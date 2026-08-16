@@ -45,20 +45,8 @@ header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 22px
 .titem b{font-family:"JetBrains Mono";font-weight:700;letter-spacing:.04em;color:var(--gold)}
 .titem .tp{font-family:"JetBrains Mono";color:var(--txt)}
 .titem .tc{font-family:"JetBrains Mono";font-size:12px}
-.ad-slot{position:relative;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,rgba(255,182,72,.06),rgba(76,201,240,.06));margin:14px 22px 0;max-width:1640px;overflow:hidden;transition:opacity .3s}
-.ad-slot.fade{opacity:.15}
-.ad-label{position:absolute;top:6px;left:10px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
-.ad-note{position:absolute;bottom:6px;right:10px;font-size:9px;color:var(--faint)}
-.ad-body{display:flex;align-items:center;gap:14px;padding:16px 18px;min-height:76px}
-.ad-emoji{font-size:30px;flex:none}
-.ad-txt{flex:1;min-width:0}
-.ad-txt b{font-family:"Unbounded";font-size:14px;color:var(--gold);display:block}
-.ad-txt span{font-size:12px;color:var(--mut);display:block;margin-top:2px}
-.ad-cta{flex:none;border:none;border-radius:9px;padding:10px 16px;min-height:40px;background:linear-gradient(180deg,#ffd98a,#f5a623);color:#1c1204;font:800 12px "Golos Text";cursor:pointer;transition:.2s}
-.ad-cta:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(245,166,35,.4)}
-.ad-rect .ad-body{flex-direction:column;text-align:center;min-height:230px;justify-content:center;gap:10px}
-.ad-rect .ad-emoji{font-size:44px}
-.ad-rect .ad-txt b{font-size:16px}
+.ad-slot{border:1px dashed rgba(148,163,184,.18);border-radius:12px;margin:14px 22px 0;max-width:1640px;min-height:90px;background:rgba(13,21,38,.35)}
+.ad-rect{min-height:230px;margin:0}
 .ad-bottom{margin:14px 22px 10px}
 .views{display:flex;gap:8px;padding:14px 22px 0;max-width:1680px;margin:0 auto;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .vbtn{flex:none;border:1px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--panel2));color:var(--mut);font:800 13px "Golos Text";padding:11px 22px;min-height:var(--tap);border-radius:12px;cursor:pointer;transition:.2s;white-space:nowrap}
@@ -144,7 +132,6 @@ header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 22px
 .gobtn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.35)}
 .gobtn:disabled{opacity:.4;cursor:not-allowed}
 .fineprint{font-size:10.5px;color:var(--faint);margin-top:10px;line-height:1.5}
-/* стакан */
 .dom{padding:6px 10px 8px;font-family:"JetBrains Mono";font-size:12px}
 .dom-head{display:flex;justify-content:space-between;color:var(--faint);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:2px 6px 6px;font-family:"Golos Text";font-weight:700}
 .dom-row{display:flex;justify-content:space-between;align-items:center;padding:4px 6px;border-radius:6px;position:relative;cursor:pointer;overflow:hidden}
@@ -156,7 +143,6 @@ header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 22px
 .dom-row .dv{position:relative;z-index:1;color:var(--mut);font-size:11px}
 .dom-spread{text-align:center;font-size:11px;color:var(--gold);border-block:1px dashed rgba(255,182,72,.35);padding:5px 0;margin:4px 0}
 .dom-note{padding:8px 14px 12px;font-size:10.5px;color:var(--faint);line-height:1.5}
-/* нижние вкладки терминала */
 .bottom{max-width:1680px;margin:0 auto 10px;padding:0 22px}
 .bpanel{overflow:hidden}
 .btabs{display:flex;gap:4px;padding:12px 14px 0;border-bottom:1px solid var(--line);overflow-x:auto}
@@ -181,7 +167,6 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(76,201,240,.0
 .feecard b{font-family:"Unbounded";font-size:20px;color:var(--gold);display:block;margin-bottom:5px}
 .feecard span{font-size:12.5px;color:var(--mut);line-height:1.5}
 .warnbox{margin:4px 2px 6px;border:1px solid rgba(255,182,72,.4);background:rgba(255,182,72,.07);border-radius:12px;padding:13px 16px;font-size:13px;color:#ffd9a0;line-height:1.55}
-/* вид «Портфель» */
 .pwrap{padding:16px 22px;max-width:1680px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 .pstats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .pstat{padding:16px}
@@ -190,7 +175,6 @@ tbody tr{transition:background .15s}tbody tr:hover{background:rgba(76,201,240,.0
 .pstat .big2{font-family:"JetBrains Mono";font-size:clamp(18px,2.2vw,24px);font-weight:700;margin:0 0 8px}
 .pstat .sub{font-size:12px;color:var(--mut)}
 .rankbig{font-size:18px;font-weight:800;margin:6px 0 6px;color:var(--cyan)}
-/* вид «Документы» */
 .docs{display:grid;grid-template-columns:250px minmax(0,1fr);gap:16px;padding:16px 22px;max-width:1680px;margin:0 auto;align-items:start}
 .dnav{display:flex;flex-direction:column;gap:6px}
 .dbtn{border:1px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--panel2));color:var(--mut);font:700 13px "Golos Text";padding:12px 14px;min-height:var(--tap);border-radius:10px;cursor:pointer;transition:.18s;text-align:left}
@@ -264,8 +248,7 @@ footer{padding:8px 14px 26px}}
 #toasts{right:10px;bottom:calc(10px + env(safe-area-inset-bottom));max-width:calc(100vw - 20px)}
 .toast{padding:10px 14px;font-size:12px;max-width:280px}
 #chart{height:240px}.ranges{top:6px;right:10px}.rbtn{padding:6px 10px;font-size:10px}
-.ad-txt span{display:none}.ad-emoji{font-size:24px}.ad-cta{padding:8px 12px;font-size:11px}
-.ad-rect .ad-body{min-height:180px}.ad-rect .ad-txt span{display:block}}
+.ad-slot{min-height:70px}.ad-rect{min-height:160px}}
 @media(max-width:380px){.brand h1{font-size:13px;letter-spacing:0}.coin{width:38px;height:38px;font-size:20px}.pcts{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
@@ -278,8 +261,7 @@ footer{padding:8px 14px 26px}}
   <button class="ghost-btn" id="resetBtn">⟲ Сбросить счёт</button>
 </header>
 <div class="tape-wrap"><div class="tape" id="tape"></div></div>
-<!-- РЕКЛАМА №1: для настоящей рекламы вставьте сюда код AdSense/РСЯ вместо содержимого -->
-<div class="ad-slot"><span class="ad-label">Реклама</span><div class="ad-body"></div><span class="ad-note">ваш баннер может быть здесь</span></div>
+<div class="ad-slot"></div>
 
 <nav class="views">
   <button class="vbtn on" data-v="terminal">📈 Терминал</button>
@@ -287,7 +269,6 @@ footer{padding:8px 14px 26px}}
   <button class="vbtn" data-v="docs">📚 Документы</button>
 </nav>
 
-<!-- ═══ ВИД: ТЕРМИНАЛ ═══ -->
 <div id="viewTerminal">
 <main class="layout">
   <aside class="panel">
@@ -362,7 +343,7 @@ footer{padding:8px 14px 26px}}
       </div>
       <div class="dom-note">Синтетический стакан для тренировки чтения рынка. Клик по строке — подставить её объём в ордер.</div>
     </div>
-    <div class="ad-slot ad-rect" style="margin:0"><span class="ad-label">Реклама</span><div class="ad-body"></div><span class="ad-note">ваш баннер может быть здесь</span></div>
+    <div class="ad-slot ad-rect"></div>
   </aside>
 </main>
 <section class="bottom">
@@ -386,7 +367,6 @@ footer{padding:8px 14px 26px}}
 </section>
 </div>
 
-<!-- ═══ ВИД: ПОРТФЕЛЬ ═══ -->
 <section id="viewPortfolio" style="display:none">
   <div class="pwrap">
     <div class="pstats">
@@ -400,7 +380,6 @@ footer{padding:8px 14px 26px}}
   </div>
 </section>
 
-<!-- ═══ ВИД: ДОКУМЕНТЫ ═══ -->
 <section id="viewDocs" style="display:none">
   <div class="docs">
     <div class="dnav">
@@ -450,7 +429,7 @@ footer{padding:8px 14px 26px}}
         <h4>3. Сторонние сервисы</h4>
         <p>Для отображения котировок приложение обращается к публичному API CoinGecko. При запросах ваш IP-адрес и стандартные HTTP-заголовки передаются этому сервису; их обработка регулируется политикой конфиденциальности CoinGecko.</p>
         <h4>4. Cookies и аналитика</h4>
-        <p>Приложение не использует cookies и трекеры. Если на сайте подключаются рекламные сети (например, Google AdSense или Яндекс РСЯ), они могут обрабатывать данные согласно собственным политикам.</p>
+        <p>Приложение не использует cookies и трекеры. Если на сайте подключаются рекламные сети, они могут обрабатывать данные согласно собственным политикам.</p>
         <h4>5. Изменения</h4>
         <p>Политика может обновляться. Новая редакция действует с момента публикации на этой странице.</p>
         <h4>6. Контакты</h4>
@@ -468,16 +447,14 @@ footer{padding:8px 14px 26px}}
         <p>Пользователь обязуется использовать приложение законными способами и не вмешиваться в его работу. Игровые результаты не имеют юридической силы и не создают денежных обязательств.</p>
         <h4>5. Ограничение ответственности</h4>
         <p>Приложение предоставляется «как есть». Владелец не отвечает за убытки, упущенную выгоду и любые последствия использования приложения, включая потерю прогресса при очистке данных браузера.</p>
-        <h4>6. Реклама</h4>
-        <p>На сайте могут размещаться рекламные материалы. Ответственность за их содержание несут рекламодатели.</p>
-        <h4>7. Изменение условий</h4>
+        <h4>6. Изменение условий</h4>
         <p>Владелец вправе изменять приложение и настоящее соглашение без предварительного уведомления. Продолжение использования означает согласие с новыми условиями.</p>
       </div>
     </div>
   </div>
 </section>
 
-<div class="ad-slot ad-bottom"><span class="ad-label">Реклама</span><div class="ad-body"></div><span class="ad-note">ваш баннер может быть здесь</span></div>
+<div class="ad-slot ad-bottom"></div>
 <footer>Хомяк-Инвест · симулятор инвестиций · данные о криптовалютах: api.coingecko.com (RUB) · не является инвестиционной рекомендацией 🐹<span class="love">Люблю свою девушку Любу 😘</span></footer>
 
 <div class="overlay" id="ovl">
@@ -509,7 +486,7 @@ const STOCKS=[
 const ASSETS=[...CRYPTO.map(c=>({...c,type:'crypto'})),...STOCKS.map(s=>({...s,type:'stock',sim:true}))];
 const bySym=Object.fromEntries(ASSETS.map(a=>[a.sym,a]));
 const MKT={};ASSETS.forEach(a=>MKT[a.sym]={p:a.base,ch:0,day:[],dir:0});
-let state,current='BTC',side='buy',range='24h',filter='all',LIVE=false,fallbackDone=false,lastQuote=null,chartCache=[],hoverIdx=null;
+let state,current='BTC',side='buy',range='24h',filter='all',SRC=null,lastQuote=null,chartCache=[],hoverIdx=null;
 function defState(){return{cash:START,hold:{},ops:[],fees:0,tax:0,realized:0}}
 try{state=Object.assign(defState(),JSON.parse(localStorage.getItem(LS)||'{}'))}catch(e){state=defState()}
 function save(){localStorage.setItem(LS,JSON.stringify(state))}
@@ -521,54 +498,41 @@ const tShort=t=>new Date(t).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2
 const parseN=s=>parseFloat(String(s).replace(/[\s\u00A0]/g,'').replace(',','.'));
 function rank(p){if(p<=-20)return'🐹💸 Хомяк в панике';if(p<0)return'🐹📉 Грустный хомяк';if(p<5)return'🐹 Хомячок-новичок';
  if(p<15)return'🐹📈 Матёрый хомяк';if(p<40)return'🐺 Волк с Тверской';return'👑 Легенда биржи'}
-/* реклама */
-const ADS=[
- {e:'🐹📈',t:'Академия Хомяка',d:'От норки до Уолл-стрит за 30 дней. Первый урок — бесплатно!',c:'Записаться'},
- {e:'😘',t:'Люба одобряет',d:'Самая надёжная инвестиция — в любовь. Доходность бесконечна.',c:'Инвестировать'},
- {e:'🌰',t:'Грецкие орехи оптом',d:'Зима близко. Запасайся ликвидностью со скидкой 20%.',c:'Смотреть'},
- {e:'⚡',t:'Хомяк PRO',d:'Комиссия 0,1% и стакан котировок в реальном времени.',c:'Подключить'},
- {e:'🎡',t:'Колесо фортуны',d:'Крути и получай до +100 500 виртуальных ₽ каждый день.',c:'Крутить'}];
-let adIdx=0;
-function renderAds(){document.querySelectorAll('.ad-body').forEach(b=>{
- const a=ADS[adIdx%ADS.length];
- b.innerHTML=`<span class="ad-emoji">${a.e}</span><div class="ad-txt"><b>${a.t}</b><span>${a.d}</span></div><button class="ad-cta">${a.c}</button>`;
- b.querySelector('.ad-cta').onclick=()=>toast('📢 Это рекламное место. Вставьте код AdSense или Яндекс РСЯ в разметку — и здесь будет настоящая реклама.','info')});adIdx++}
-setInterval(()=>{document.querySelectorAll('.ad-slot').forEach(s=>s.classList.add('fade'));
- setTimeout(()=>{renderAds();document.querySelectorAll('.ad-slot').forEach(s=>s.classList.remove('fade'))},300)},9000);
 /* симуляция */
 function seedSim(a){const n=288,arr=[a.base*(1+(Math.random()-.5)*.04)];
  for(let i=1;i<n;i++)arr.push(arr[i-1]*(1+(Math.random()-.497)*(a.vol||.0012)*6));
  const nw=Date.now();MKT[a.sym].day=arr.map((p,i)=>({t:nw-(n-1-i)*5*60e3,p}));
  MKT[a.sym].p=arr[n-1];MKT[a.sym].ch=(arr[n-1]/arr[0]-1)*100;MKT[a.sym].dir=0}
 STOCKS.forEach(seedSim);
-function fallbackSim(){if(fallbackDone)return;fallbackDone=true;
- CRYPTO.forEach(c=>{c.sim=true;seedSim(c)});
- toast('📡 Нет связи с биржей — включена оффлайн-симуляция котировок','info')}
 function simTick(){const nw=Date.now();
  ASSETS.forEach(a=>{if(!a.sim)return;const m=MKT[a.sym];
   m.p*=Math.exp((Math.random()+Math.random()+Math.random()-1.5)*(a.vol||.0012)*1.9);
   m.day.push({t:nw,p:m.p});if(m.day.length>1500)m.day.shift();
   m.ch=(m.p/m.day[0].p-1)*100;m.dir=0});
  afterPrices()}
-/* живые котировки */
+/* живые котировки — источник цен фиксируется на сессию (SRC: 'live' | 'sim') */
 async function fetchCrypto(){
+ if(SRC==='sim'){setStatus(false);return}
  try{
-  const live=CRYPTO.filter(c=>!c.sim);
-  if(live.length){
-   const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids='+live.map(c=>c.id).join(',')+'&vs_currencies=rub&include_24hr_change=true');
-   if(!r.ok)throw 0;const j=await r.json();
-   live.forEach(c=>{const d=j[c.id];if(!d||!d.rub)return;const m=MKT[c.sym],old=m.p;
-    m.p=d.rub;m.ch=d.rub_24h_change||0;m.dir=old?Math.sign(d.rub-old):0;
-    const last=m.day[m.day.length-1];
-    if(!last||now()-last.t>15e3)m.day.push({t:now(),p:d.rub});
-    if(m.day.length>1400)m.day.shift()});
-   LIVE=true;fallbackDone=false}
+  const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids='+CRYPTO.map(c=>c.id).join(',')+'&vs_currencies=rub&include_24hr_change=true');
+  if(!r.ok)throw 0;const j=await r.json();
+  SRC='live';
+  CRYPTO.forEach(c=>{const d=j[c.id];if(!d||!d.rub)return;const m=MKT[c.sym],old=m.p;
+   m.p=d.rub;m.ch=d.rub_24h_change||0;m.dir=old?Math.sign(d.rub-old):0;
+   const last=m.day[m.day.length-1];
+   if(!last||now()-last.t>15e3)m.day.push({t:now(),p:d.rub});
+   if(m.day.length>1400)m.day.shift()});
   setStatus(true);document.getElementById('updTime').textContent=new Date().toLocaleTimeString('ru-RU');
   afterPrices();
- }catch(e){if(!LIVE)fallbackSim();setStatus(false)}}
+ }catch(e){
+  if(SRC===null){SRC='sim';
+   CRYPTO.forEach(c=>{c.sim=true;seedSim(c)});
+   toast('📡 Нет связи с биржей — включена оффлайн-симуляция котировок','info')}
+  setStatus(false)}}
 const now=()=>Date.now();
 function setStatus(ok){const d=document.getElementById('stDot'),t=document.getElementById('stTxt');
- d.classList.toggle('off',!ok);t.textContent=ok?'LIVE · котировки CoinGecko':'СИМУЛЯЦИЯ · нет сети'}
+ d.classList.toggle('off',!ok);
+ t.textContent=ok?'LIVE · котировки CoinGecko':(SRC==='sim'?'СИМУЛЯЦИЯ · оффлайн-режим':'LIVE · нет связи, показаны последние котировки')}
 async function loadDay(a){
  if(a.type!=='crypto'||a.sim||MKT[a.sym].loadedDay)return;
  try{const r=await fetch(`https://api.coingecko.com/api/v3/coins/${a.id}/market_chart?vs_currency=rub&days=1`);
@@ -656,7 +620,6 @@ function drawChart(hi){
  ctx.lineTo(X(data.length-1),h-PADB);ctx.lineTo(X(0),h-PADB);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
  ctx.beginPath();data.forEach((d,i)=>i?ctx.lineTo(X(i),Y(d.p)):ctx.moveTo(X(i),Y(d.p)));
  ctx.strokeStyle=col;ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
- /* средняя цена позиции */
  const hh=state.hold[current];
  if(hh&&hh.qty>1e-9){const avg=hh.invested/hh.qty;
   if(avg>=mn&&avg<=mx){const y=Y(avg);
@@ -664,19 +627,17 @@ function drawChart(hi){
    ctx.beginPath();ctx.moveTo(PADL,y);ctx.lineTo(w-PADR,y);ctx.stroke();ctx.setLineDash([]);
    ctx.fillStyle='#ffb648';ctx.font='700 10px "JetBrains Mono"';ctx.textAlign='left';
    ctx.fillText('ср. '+fmtP(avg),PADL+4,y-5)}}
- /* метки сделок */
  const t0=data[0].t,t1=data[data.length-1].t;
  state.ops.forEach(o=>{if(o.sym!==current||o.t<t0||o.t>t1)return;
-  let lo=0,hh2=data.length-1;
-  while(hh2-lo>1){const md=(lo+hh2)>>1;(data[md].t<o.t)?lo=md:hh2=md}
-  const i=(o.t-data[lo].t<data[hh2].t-o.t)?lo:hh2;
+  let lo=0,hi2=data.length-1;
+  while(hi2-lo>1){const md=(lo+hi2)>>1;(data[md].t<o.t)?lo=md:hi2=md}
+  const i=(o.t-data[lo].t<data[hi2].t-o.t)?lo:hi2;
   const x=X(i),py=Y(Math.min(Math.max(o.px,mn),mx)),isB=o.side==='buy';
   ctx.beginPath();
   if(isB){ctx.moveTo(x,py+7);ctx.lineTo(x-6,py+17);ctx.lineTo(x+6,py+17)}
   else{ctx.moveTo(x,py-7);ctx.lineTo(x-6,py-17);ctx.lineTo(x+6,py-17)}
   ctx.closePath();ctx.fillStyle=isB?'#2fd575':'#ff5d6c';ctx.fill();
   ctx.strokeStyle='rgba(10,15,30,.85)';ctx.lineWidth=1.5;ctx.stroke()});
- /* последняя точка и время */
  ctx.beginPath();ctx.arc(X(data.length-1),Y(data[data.length-1].p),3.5,0,7);ctx.fillStyle=col;ctx.fill();
  ctx.fillStyle='#5b6b8c';ctx.textAlign='center';
  ctx.fillText(tShort(data[0].t),PADL+28,h-6);ctx.fillText(tShort(data[data.length-1].t),w-PADR-28,h-6);
@@ -901,7 +862,7 @@ function toast(html,cls){const box=document.getElementById('toasts'),d=document.
 /* цикл */
 function afterPrices(){updateTape();renderList();updateHead();drawChart(hoverIdx);
  updatePreview();renderAccount();renderPortfolio();renderDOM()}
-renderAds();renderList();updateHead();drawChart();updatePreview();renderAccount();renderPortfolio();renderHistory();renderDOM();
+renderList();updateHead();drawChart();updatePreview();renderAccount();renderPortfolio();renderHistory();renderDOM();
 loadDay(bySym[current]);fetchCrypto();
 setInterval(fetchCrypto,20000);
 setInterval(simTick,2500);
