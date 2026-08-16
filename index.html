@@ -280,7 +280,7 @@ footer{padding:8px 14px 26px}}
       <button class="fbtn" data-f="stock">Акции</button>
     </div>
     <div class="alist" id="alist"></div>
-    <div class="listnote">Крипто — live CoinGecko (шаг ~20 с). Акции — симуляция (метка СИМ).</div>
+    <div class="listnote">Крипто — live CoinGecko (~20 с). Акции — live Мосбиржа в часы торгов. Без сети — симуляция (СИМ).</div>
   </aside>
   <section style="display:flex;flex-direction:column;gap:16px;min-width:0">
     <div class="panel">
@@ -362,7 +362,7 @@ footer{padding:8px 14px 26px}}
         <div class="feecard"><b>13%</b><span>НДФЛ удерживается автоматически с прибыли при продаже.</span></div>
         <div class="feecard"><b>0 сек</b><span>Мгновенное исполнение по последней котировке. Акции — целыми лотами.</span></div>
       </div>
-      <div class="warnbox">⚠️ Это игра. Баланс, ордера и прибыль — виртуальные. Приложение ничего не покупает и не отправляет заявки на биржу.</div>
+      <div class="warnbox">⚠️ Это игра. Баланс, ордера и прибыль — виртуальные. Приложение ничего не покупает и не отправляет заявки на биржу. Котировки: крипто — CoinGecko, акции — Мосбиржа (возможны задержки).</div>
     </div>
   </div>
 </section>
@@ -392,23 +392,23 @@ footer{padding:8px 14px 26px}}
     <div style="min-width:0">
       <div class="panel doc" id="doc-about">
         <h3>О проекте</h3><div class="date">«Хомяк-Инвест» · симулятор биржи</div>
-        <p>«Хомяк-Инвест» — бесплатный игровой симулятор биржи, в котором можно разобраться, как устроены торги, не рискуя настоящими деньгами. На старте вы получаете 100 000 виртуальных рублей и торгуете по котировкам, максимально приближенным к реальным.</p>
+        <p>«Хомяк-Инвест» — бесплатный игровой симулятор биржи, в котором можно разобраться, как устроены торги, не рискуя настоящими деньгами. На старте вы получаете 100 000 виртуальных рублей и торгуете по реальным котировкам.</p>
         <h4>Что внутри</h4>
         <ul>
-          <li>Реальные котировки криптовалют в рублях (Bitcoin, Ethereum, TON, Solana, XRP, Dogecoin) — данные публичного API CoinGecko, обновление примерно раз в 20 секунд;</li>
-          <li>Акции российских компаний — честная симуляция рыночных колебаний (помечены меткой «СИМ»);</li>
+          <li>Реальные котировки криптовалют в рублях (Bitcoin, Ethereum, TON, Solana, XRP, Dogecoin) — публичный API CoinGecko, обновление примерно раз в 20 секунд;</li>
+          <li>Акции Мосбиржи (Сбер, Яндекс, Лукойл, Газпром, Озон, ВТБ) — реальные котировки ISS MOEX в рублях в часы торгов; ночью и в выходные цена держится на последнем закрытии;</li>
           <li>Комиссии как у настоящего брокера: 0,3% (мин. 1 ₽) + сбор биржи 0,03%, спред ±0,15%, НДФЛ 13% с прибыли при продаже;</li>
           <li>Живой график с отметками ваших сделок, стакан заявок, портфель, история операций и ранги игрока — от «Хомячка-новичка» до «Легенды биржи»;</li>
-          <li>Прогресс сохраняется в вашем браузере и никуда не отправляется.</li>
+          <li>Если связи с API нет, активы честно переходят в симуляцию (метка СИМ). Прогресс сохраняется в вашем браузере и никуда не отправляется.</li>
         </ul>
         <h4>Главное</h4>
-        <p>Приложение не является брокером: реальные сделки не совершаются, ордера никуда не отправляются. Проект создан для развлечения и обучения..</p>
+        <p>Приложение не является брокером: реальные сделки не совершаются, ордера никуда не отправляются. Проект создан для развлечения и обучения. </p>
       </div>
       <div class="panel doc" id="doc-rules" style="display:none">
         <h3>Правила игры</h3><div class="date">Как пользоваться симулятором</div>
         <ol>
           <li>На старте на счёте <b>100 000 виртуальных ₽</b>.</li>
-          <li>Выберите актив в списке «Котировки»: крипто — реальные цены, акции — симуляция.</li>
+          <li>Выберите актив в списке «Котировки»: крипто — данные CoinGecko, акции — данные Мосбиржи (в часы торгов). Если связи нет, активы работают в симуляции (метка СИМ).</li>
           <li>Покупка: введите сумму или количество либо нажмите 25% / 50% / 75% / MAX — окно подтверждения откроется сразу. Нажмите «Подтвердить», и актив появится в портфеле.</li>
           <li>Продажа: переключитесь на «Продать», укажите долю позиции и подтвердите. С прибыли автоматически удерживается НДФЛ 13%.</li>
           <li>За каждую сделку списывается комиссия брокера 0,3% (мин. 1 ₽) + сбор биржи 0,03%; покупка идёт по цене ask (+0,15%), продажа — по bid (−0,15%).</li>
@@ -428,7 +428,7 @@ footer{padding:8px 14px 26px}}
         <h4>2. Локальные данные</h4>
         <p>Игровой прогресс (баланс, портфель, история операций) хранится только на вашем устройстве в localStorage браузера и не передаётся на серверы. Удалить данные можно кнопкой «Сбросить счёт» или очисткой данных сайта в браузере.</p>
         <h4>3. Сторонние сервисы</h4>
-        <p>Для отображения котировок приложение обращается к публичному API CoinGecko. При запросах ваш IP-адрес и стандартные HTTP-заголовки передаются этому сервису; их обработка регулируется политикой конфиденциальности CoinGecko.</p>
+        <p>Для отображения котировок приложение обращается к публичным API CoinGecko (криптовалюты) и Мосбиржи ISS MOEX (акции). При запросах ваш IP-адрес и стандартные HTTP-заголовки передаются этим сервисам; обработка регулируется их политиками конфиденциальности.</p>
         <h4>4. Cookies и аналитика</h4>
         <p>Приложение не использует cookies и трекеры. Если на сайте подключаются рекламные сети, они могут обрабатывать данные согласно собственным политикам.</p>
         <h4>5. Изменения</h4>
@@ -443,7 +443,7 @@ footer{padding:8px 14px 26px}}
         <h4>2. Статус средств и операций</h4>
         <p>Все средства, активы и операции внутри приложения — виртуальные. Приложение не является брокером, биржей или инвестиционным советником, не совершает реальных сделок и не даёт инвестиционных рекомендаций.</p>
         <h4>3. Котировки</h4>
-        <p>Котировки криптовалют предоставляются сторонним сервисом CoinGecko и могут быть задержаны. Котировки акций являются результатом математической симуляции. Точность, полнота и непрерывность данных не гарантируются.</p>
+        <p>Котировки криптовалют предоставляются сервисом CoinGecko, акции — Мосбиржей (ISS MOEX); данные могут быть задержаны, а вне торговых часов акции остаются на цене последнего закрытия. При отсутствии подключения цены симулируются. Точность, полнота и непрерывность данных не гарантируются.</p>
         <h4>4. Обязанности пользователя</h4>
         <p>Пользователь обязуется использовать приложение законными способами и не вмешиваться в его работу. Игровые результаты не имеют юридической силы и не создают денежных обязательств.</p>
         <h4>5. Ограничение ответственности</h4>
@@ -456,7 +456,7 @@ footer{padding:8px 14px 26px}}
 </section>
 
 <div class="ad-slot ad-bottom"></div>
-<footer>Хомяк-Инвест · симулятор инвестиций · данные о криптовалютах: api.coingecko.com (RUB) · не является инвестиционной рекомендацией 🐹<span class="love">Люблю свою девушку Любу 😘</span></footer>
+<footer>Хомяк-Инвест · симулятор инвестиций · данные о криптовалютах: api.coingecko.com (RUB) · акции: iss.moex.com · не является инвестиционной рекомендацией 🐹<span class="love">Люблю свою девушку Любу 😘</span></footer>
 
 <div class="overlay" id="ovl">
   <div class="modal">
@@ -484,10 +484,10 @@ const STOCKS=[
  {sym:'GAZP',name:'Газпром',icon:'Г',color:'#6ea8ff',base:128.6,vol:.0010},
  {sym:'OZON',name:'Озон',icon:'O',color:'#4c7dff',base:3120,vol:.0014},
  {sym:'VTBR',name:'ВТБ',icon:'В',color:'#38b6ff',base:96.4,vol:.0011}];
-const ASSETS=[...CRYPTO.map(c=>({...c,type:'crypto'})),...STOCKS.map(s=>({...s,type:'stock',sim:true}))];
+const ASSETS=[...CRYPTO.map(c=>({...c,type:'crypto'})),...STOCKS.map(s=>({...s,type:'stock',sim:false}))];
 const bySym=Object.fromEntries(ASSETS.map(a=>[a.sym,a]));
 const MKT={};ASSETS.forEach(a=>MKT[a.sym]={p:a.base,ch:0,day:[],dir:0});
-let state,current='BTC',side='buy',range='24h',filter='all',SRC=null,lastQuote=null,chartCache=[],hoverIdx=null;
+let state,current='BTC',side='buy',range='24h',filter='all',SRC_C=null,SRC_S=null,lastQuote=null,chartCache=[],hoverIdx=null;
 function defState(){return{cash:START,hold:{},ops:[],fees:0,tax:0,realized:0}}
 try{state=Object.assign(defState(),JSON.parse(localStorage.getItem(LS)||'{}'))}catch(e){state=defState()}
 function save(){localStorage.setItem(LS,JSON.stringify(state))}
@@ -499,47 +499,91 @@ const tShort=t=>new Date(t).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2
 const parseN=s=>parseFloat(String(s).replace(/[\s\u00A0]/g,'').replace(',','.'));
 function rank(p){if(p<=-20)return'🐹💸 Хомяк в панике';if(p<0)return'🐹📉 Грустный хомяк';if(p<5)return'🐹 Хомячок-новичок';
  if(p<15)return'🐹📈 Матёрый хомяк';if(p<40)return'🐺 Волк с Тверской';return'👑 Легенда биржи'}
-/* симуляция */
+/* симуляция (запасной режим) */
 function seedSim(a){const n=288,arr=[a.base*(1+(Math.random()-.5)*.04)];
  for(let i=1;i<n;i++)arr.push(arr[i-1]*(1+(Math.random()-.497)*(a.vol||.0012)*6));
  const nw=Date.now();MKT[a.sym].day=arr.map((p,i)=>({t:nw-(n-1-i)*5*60e3,p}));
  MKT[a.sym].p=arr[n-1];MKT[a.sym].ch=(arr[n-1]/arr[0]-1)*100;MKT[a.sym].dir=0}
-STOCKS.forEach(seedSim);
 function simTick(){const nw=Date.now();
  ASSETS.forEach(a=>{if(!a.sim)return;const m=MKT[a.sym];
   m.p*=Math.exp((Math.random()+Math.random()+Math.random()-1.5)*(a.vol||.0012)*1.9);
   m.day.push({t:nw,p:m.p});if(m.day.length>1500)m.day.shift();
   m.ch=(m.p/m.day[0].p-1)*100;m.dir=0});
  afterPrices()}
-/* живые котировки — источник цен фиксируется на сессию (SRC: 'live' | 'sim') */
+/* статус */
+function updateStatus(){const d=document.getElementById('stDot'),t=document.getElementById('stTxt');
+ if(SRC_C===null||SRC_S===null){t.textContent='Подключение к рынку…';return}
+ const ok=SRC_C==='live'&&SRC_S==='live';
+ d.classList.toggle('off',!ok);
+ t.textContent=ok?'LIVE · CoinGecko + Мосбиржа':
+  (SRC_C==='live'?'LIVE крипто · акции в симуляции':
+  (SRC_S==='live'?'Крипто в симуляции · LIVE акции':'СИМУЛЯЦИЯ · оффлайн-режим'))}
+/* живая крипта — CoinGecko */
 async function fetchCrypto(){
- if(SRC==='sim'){setStatus(false);return}
+ if(SRC_C==='sim'){updateStatus();return}
  try{
   const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids='+CRYPTO.map(c=>c.id).join(',')+'&vs_currencies=rub&include_24hr_change=true');
   if(!r.ok)throw 0;const j=await r.json();
-  SRC='live';
+  SRC_C='live';
   CRYPTO.forEach(c=>{const d=j[c.id];if(!d||!d.rub)return;const m=MKT[c.sym],old=m.p;
    m.p=d.rub;m.ch=d.rub_24h_change||0;m.dir=old?Math.sign(d.rub-old):0;
    const last=m.day[m.day.length-1];
    if(!last||now()-last.t>15e3)m.day.push({t:now(),p:d.rub});
    if(m.day.length>1400)m.day.shift()});
-  setStatus(true);document.getElementById('updTime').textContent=new Date().toLocaleTimeString('ru-RU');
-  afterPrices();
+  document.getElementById('updTime').textContent=new Date().toLocaleTimeString('ru-RU');
+  updateStatus();afterPrices();
  }catch(e){
-  if(SRC===null){SRC='sim';
-   CRYPTO.forEach(c=>{c.sim=true;seedSim(c)});
-   toast('📡 Нет связи с биржей — включена оффлайн-симуляция котировок','info')}
-  setStatus(false)}}
+  if(SRC_C===null){SRC_C='sim';
+   CRYPTO.forEach(c=>{bySym[c.sym].sim=true;seedSim(bySym[c.sym])});
+   toast('📡 CoinGecko недоступен — крипто работает в симуляции','info')}
+  updateStatus()}}
+/* живые акции — Мосбиржа ISS MOEX */
+async function fetchStocks(){
+ if(SRC_S==='sim'){updateStatus();return}
+ try{
+  const r=await fetch('https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.json?iss.meta=off&iss.only=securities&securities.columns=SECID,LAST,PREVPRICE');
+  if(!r.ok)throw 0;const j=await r.json();
+  if(!j.securities||!j.securities.data)throw 0;
+  const rows=j.securities.data;
+  if(SRC_S===null){STOCKS.forEach(s=>{MKT[s.sym].day=[];MKT[s.sym].loadedDay=false})}
+  SRC_S='live';
+  STOCKS.forEach(s=>{
+   const row=rows.find(x=>x[0]===s.sym);if(!row)return;
+   const last=row[1],prev=row[2];
+   if(typeof last!=='number'||last<=0)return;
+   bySym[s.sym].sim=false;
+   const m=MKT[s.sym],old=m.p;
+   m.p=last;
+   m.ch=(typeof prev==='number'&&prev>0)?(last/prev-1)*100:0;
+   m.dir=old?Math.sign(last-old):0;
+   const lp=m.day[m.day.length-1];
+   if(!lp||Math.abs(lp.p-last)>1e-9||now()-lp.t>60e3)m.day.push({t:now(),p:last});
+   if(m.day.length>1400)m.day.shift()});
+  updateStatus();afterPrices();
+ }catch(e){
+  if(SRC_S===null){SRC_S='sim';
+   STOCKS.forEach(s=>{bySym[s.sym].sim=true;seedSim(bySym[s.sym])});
+   toast('📡 Мосбиржа недоступна — акции работают в симуляции','info')}
+  updateStatus()}}
 const now=()=>Date.now();
-function setStatus(ok){const d=document.getElementById('stDot'),t=document.getElementById('stTxt');
- d.classList.toggle('off',!ok);
- t.textContent=ok?'LIVE · котировки CoinGecko':(SRC==='sim'?'СИМУЛЯЦИЯ · оффлайн-режим':'LIVE · нет связи, показаны последние котировки')}
+/* график за день: крипта — CoinGecko, акции — свечи Мосбиржи */
 async function loadDay(a){
- if(a.type!=='crypto'||a.sim||MKT[a.sym].loadedDay)return;
- try{const r=await fetch(`https://api.coingecko.com/api/v3/coins/${a.id}/market_chart?vs_currency=rub&days=1`);
-  const j=await r.json();if(!j.prices)return;
-  MKT[a.sym].day=j.prices.map(([t,p])=>({t,p}));MKT[a.sym].loadedDay=true;
-  updateHead();drawChart()}catch(e){}}
+ if(a.sim||MKT[a.sym].loadedDay)return;
+ if(a.type==='crypto'){
+  try{const r=await fetch(`https://api.coingecko.com/api/v3/coins/${a.id}/market_chart?vs_currency=rub&days=1`);
+   const j=await r.json();if(!j.prices)return;
+   MKT[a.sym].day=j.prices.map(([t,p])=>({t,p}));MKT[a.sym].loadedDay=true;
+   updateHead();drawChart()}catch(e){}
+ }else{
+  try{const from=new Date(Date.now()-4*864e5).toISOString().slice(0,10);
+   const r=await fetch(`https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities/${a.sym}/candles.json?iss.meta=off&interval=10&from=${from}&candles.columns=CLOSE,END`);
+   const j=await r.json();if(!j.candles||!j.candles.data||!j.candles.data.length)return;
+   MKT[a.sym].day=j.candles.data.map(row=>({t:new Date(String(row[1]).replace(' ','T')).getTime(),p:row[0]}))
+    .filter(d=>typeof d.p==='number'&&d.p>0);
+   if(!MKT[a.sym].day.length)return;
+   MKT[a.sym].loadedDay=true;
+   updateHead();drawChart()}catch(e){}}
+}
 /* бегущая строка */
 const tapeRefs=[];
 (function(){const tape=document.getElementById('tape');
@@ -577,7 +621,7 @@ function selectAsset(sym){current=sym;hoverIdx=null;
 function updateHead(){const a=bySym[current],m=MKT[current];
  const ic=document.getElementById('hIcon');ic.textContent=a.icon;ic.style.setProperty('--c',a.color);
  document.getElementById('hName').textContent=a.name;
- document.getElementById('hSym').textContent=a.sym+(a.type==='stock'?' · MOEX (сим)':' / RUB');
+ document.getElementById('hSym').textContent=a.sym+(a.type==='stock'?' · MOEX':' / RUB');
  const tp=document.getElementById('hType');
  if(a.sim){tp.textContent=a.type==='stock'?'СИМУЛЯЦИЯ':'СИМУЛЯЦИЯ (оффлайн)';tp.style.cssText='color:var(--cyan);border-color:rgba(76,201,240,.4)'}
  else{tp.textContent='LIVE';tp.style.cssText='color:var(--up);border-color:rgba(47,213,117,.4)'}
@@ -864,8 +908,9 @@ function toast(html,cls){const box=document.getElementById('toasts'),d=document.
 function afterPrices(){updateTape();renderList();updateHead();drawChart(hoverIdx);
  updatePreview();renderAccount();renderPortfolio();renderDOM()}
 renderList();updateHead();drawChart();updatePreview();renderAccount();renderPortfolio();renderHistory();renderDOM();
-loadDay(bySym[current]);fetchCrypto();
+loadDay(bySym[current]);fetchCrypto();fetchStocks();
 setInterval(fetchCrypto,20000);
+setInterval(fetchStocks,20000);
 setInterval(simTick,2500);
 </script>
 </body>
