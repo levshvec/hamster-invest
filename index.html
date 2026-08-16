@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Хомяк-Инвест — симулятор биржи</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800;900&family=Golos+Text:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#0a0f1e; --panel:#121c36; --panel2:#0d1526;
+  --line:rgba(148,163,184,.14); --txt:#e8edf7; --mut:#8fa0bd; --faint:#5b6b8c;
+  --up:#2fd575; --up-dim:rgba(47,213,117,.13);
+  --down:#ff5d6c; --down-dim:rgba(255,93,108,.13);
+  --gold:#ffb648; --cyan:#4cc9f0;
+  --tap:44px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scrollbar-color:#2a3a5e var(--bg0);-webkit-text-size-adjust:100%}
+body{
+  font-family:"Golos Text",system-ui,sans-serif;color:var(--txt);min-height:100vh;
+  background:linear-gradient(160deg,#0b1226 0%,#0a0f1e 55%,#0c1428 100%);
+  overflow-x:hidden;-webkit-tap-highlight-color:transparent;
+}
+button,input,[role="button"]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0;z-index:-2;opacity:.55;
+  background:repeating-linear-gradient(0deg,rgba(148,163,184,.045) 0 1px,transparent 1px 44px),
+             repeating-linear-gradient(90deg,rgba(148,163,184,.045) 0 1px,transparent 1px 44px);}
+.glow{position:fixed;border-radius:50%;filter:blur(100px);opacity:.14;pointer-events:none;z-index:-1}
+.g1{width:520px;height:520px;background:var(--gold);top:-180px;left:-120px;animation:drift 26s ease-in-out infinite alternate}
+.g2{width:620px;height:620px;background:var(--cyan);bottom:-260px;right:-160px;animation:drift 32s ease-in-out infinite alternate-reverse}
+@keyframes drift{to{transform:translate(90px,60px) scale(1.12)}}
+.mono{font-family:"JetBrains Mono",monospace}
+.up{color:var(--up)} .down{color:var(--down)}
+
+/* ── шапка ── */
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 22px 10px;max-width:1680px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.coin{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:24px;flex:none;
+  background:radial-gradient(circle at 32% 30%,#ffd98a,#f5a623 60%,#b9720f);
+  box-shadow:0 0 0 3px #0a0f1e,0 0 0 5px rgba(255,182,72,.55),0 6px 18px rgba(245,166,35,.35);
+  animation:coinPulse 3s ease-in-out infinite}
+@keyframes coinPulse{50%{box-shadow:0 0 0 3px #0a0f1e,0 0 0 7px rgba(255,182,72,.25),0 6px 24px rgba(245,166,35,.5)}}
+.brand h1{font-family:"Unbounded";font-weight:900;font-size:clamp(16px,2.4vw,21px);letter-spacing:.5px;line-height:1}
+.brand h1 em{font-style:normal;color:var(--gold)}
+.brand small{display:block;color:var(--mut);font-size:clamp(10px,1.5vw,11.5px);letter-spacing:.14em;text-transform:uppercase;margin-top:4px}
+.hspace{flex:1;min-width:0}
+.status{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mut);
+  border:1px solid var(--line);border-radius:999px;padding:7px 14px;background:rgba(13,21,38,.7);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--up);animation:blink 1.6s infinite}
+.dot.off{background:var(--gold);animation:none}
+@keyframes blink{50%{opacity:.25}}
+.ghost-btn{border:1px solid var(--line);background:transparent;color:var(--mut);border-radius:10px;
+  padding:10px 16px;min-height:var(--tap);font:600 12.5px "Golos Text";cursor:pointer;transition:.2s;white-space:nowrap}
+.ghost-btn:hover{color:var(--down);border-color:var(--down);background:var(--down-dim)}
+
+/* ── бегущая строка ── */
+.tape-wrap{border-block:1px solid var(--line);background:rgba(10,15,30,.8);overflow:hidden;position:relative}
+.tape-wrap::before,.tape-wrap::after{content:"";position:absolute;top:0;bottom:0;width:70px;z-index:2;pointer-events:none}
+.tape-wrap::before{left:0;background:linear-gradient(90deg,#0a0f1e,transparent)}
+.tape-wrap::after{right:0;background:linear-gradient(-90deg,#0a0f1e,transparent)}
+.tape{display:flex;width:max-content;gap:0;animation:slide 48s linear infinite;padding:9px 0}
+.tape-wrap:hover .tape{animation-play-state:paused}
+@keyframes slide{to{transform:translateX(-50%)}}
+.titem{display:flex;align-items:center;gap:9px;padding:0 22px;border-right:1px solid rgba(148,163,184,.1);font-size:13px;white-space:nowrap}
+.titem b{font-family:"JetBrains Mono";font-weight:700;letter-spacing:.04em;color:var(--gold)}
+.titem .tp{font-family:"JetBrains Mono";color:var(--txt)}
+.titem .tc{font-family:"JetBrains Mono";font-size:12px}
+
+/* ── каркас ── */
+.layout{display:grid;grid-template-columns:335px minmax(0,1fr) 355px;gap:16px;padding:16px 22px;max-width:1680px;margin:0 auto;align-items:start}
+.panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+  border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.28)}
+.ptitle{font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);
+  padding:14px 16px 0;display:flex;align-items:center;gap:8px}
+.ptitle .live-dot{width:6px;height:6px;border-radius:50%;background:var(--up);animation:blink 1.6s infinite}
+
+/* список активов */
+.filters{display:flex;gap:6px;padding:12px 14px 8px}
+.fbtn{flex:1;border:1px solid var(--line);background:transparent;color:var(--mut);border-radius:8px;
+  padding:8px 0;min-height:var(--tap);font:600 12px "Golos Text";cursor:pointer;transition:.18s}
+.fbtn:hover{color:var(--txt)}
+.fbtn.on{background:rgba(255,182,72,.14);border-color:rgba(255,182,72,.5);color:var(--gold)}
+.alist{overflow-y:auto;max-height:calc(100vh - 240px);padding:4px 8px 10px;-webkit-overflow-scrolling:touch}
+.arow{display:grid;grid-template-columns:36px 1fr 70px auto;gap:10px;align-items:center;padding:9px 8px;
+  border-radius:10px;cursor:pointer;border:1px solid transparent;transition:background .15s,border .15s;position:relative}
+.arow:hover{background:rgba(76,201,240,.06)}
+.arow.sel{background:rgba(255,182,72,.08);border-color:rgba(255,182,72,.35)}
+.arow.sel::before{content:"";position:absolute;left:-1px;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--gold)}
+.arow.flash-up{animation:fUp .9s} .arow.flash-dn{animation:fDn .9s}
+@keyframes fUp{0%{background:var(--up-dim)}100%{background:transparent}}
+@keyframes fDn{0%{background:var(--down-dim)}100%{background:transparent}}
+.aicon{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:15px;
+  color:#0a0f1e;background:var(--c,#888);box-shadow:inset 0 -3px 6px rgba(0,0,0,.25)}
+.ainfo b{font-size:13.5px;display:flex;gap:6px;align-items:center}
+.ainfo span{display:block;font-size:11px;color:var(--faint);margin-top:1px}
+.simbadge{font-size:9px;font-weight:800;letter-spacing:.08em;color:var(--cyan);border:1px solid rgba(76,201,240,.4);border-radius:4px;padding:1px 4px}
+.aprice{text-align:right}
+.aprice b{font-family:"JetBrains Mono";font-size:13px;font-weight:700;display:block}
+.chip{display:inline-block;font-family:"JetBrains Mono";font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;margin-top:3px}
+.chip.up{color:var(--up);background:var(--up-dim)} .chip.down{color:var(--down);background:var(--down-dim)}
+.listnote{padding:8px 16px 14px;font-size:11px;color:var(--faint)}
+
+/* центр: актив + график */
+.ahead{padding:18px 20px 14px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.ahead .aicon{width:52px;height:52px;font-size:22px}
+.atitle h2{font-family:"Unbounded";font-weight:800;font-size:clamp(16px,2.2vw,19px);letter-spacing:.3px}
+.atitle .sub{font-size:12px;color:var(--mut);margin-top:3px;display:flex;gap:8px;align-items:center}
+.bigprice{margin-left:auto;text-align:right}
+.bigprice .p{font-family:"JetBrains Mono";font-size:clamp(26px,3vw,40px);font-weight:800;line-height:1;transition:color .3s}
+.bigprice .p.fu{animation:pFU .8s} .bigprice .p.fd{animation:pFD .8s}
+@keyframes pFU{0%{color:var(--up)}100%{color:var(--txt)}}
+@keyframes pFD{0%{color:var(--down)}100%{color:var(--txt)}}
+.bigprice .sub2{margin-top:6px;display:flex;gap:8px;justify-content:flex-end;align-items:center}
+.hilo{display:flex;gap:22px;padding:0 20px 12px;font-size:12px;color:var(--mut);flex-wrap:wrap}
+.hilo b{font-family:"JetBrains Mono";color:var(--txt);font-weight:600}
+.chartbox{padding:6px 12px 14px;position:relative}
+#chart{width:100%;height:300px;display:block;cursor:crosshair;touch-action:none}
+.ranges{position:absolute;top:10px;right:22px;display:flex;gap:5px;z-index:3}
+.rbtn{border:1px solid var(--line);background:rgba(10,15,30,.75);color:var(--mut);font:700 11px "JetBrains Mono";
+  border-radius:7px;padding:8px 12px;min-height:var(--tap);cursor:pointer;transition:.15s}
+.rbtn.on{color:var(--gold);border-color:rgba(255,182,72,.5);background:rgba(255,182,72,.12)}
+
+/* правая колонка */
+.rightcol{display:flex;flex-direction:column;gap:16px}
+.acc{padding:18px}
+.acc .lbl{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);font-weight:800}
+.acc .total{font-family:"JetBrains Mono";font-size:clamp(26px,3.5vw,34px);font-weight:800;color:var(--gold);margin:6px 0 4px;line-height:1}
+.plrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.plbadge{font-family:"JetBrains Mono";font-weight:700;font-size:13px;border-radius:8px;padding:3px 9px}
+.plbadge.up{color:var(--up);background:var(--up-dim)} .plbadge.down{color:var(--down);background:var(--down-dim)}
+.rankchip{font-size:11.5px;font-weight:700;color:var(--cyan);border:1px dashed rgba(76,201,240,.45);border-radius:999px;padding:3px 10px}
+.acc .rows{border-top:1px solid var(--line);padding-top:10px;display:grid;gap:7px}
+.aro{display:flex;justify-content:space-between;font-size:13px;color:var(--mut)}
+.aro b{font-family:"JetBrains Mono";color:var(--txt);font-weight:600}
+
+/* торговая панель */
+.trade{padding:16px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0 14px}
+.sbtn{border:1px solid var(--line);background:transparent;color:var(--mut);font:800 14px "Golos Text";
+  padding:12px;min-height:var(--tap);border-radius:10px;cursor:pointer;transition:.18s}
+.sbtn.buy.on{background:linear-gradient(180deg,#34e07f,#1fae5f);color:#04120a;border-color:transparent;box-shadow:0 6px 18px rgba(47,213,117,.3)}
+.sbtn.sell.on{background:linear-gradient(180deg,#ff7280,#e23a4e);color:#1c0407;border-color:transparent;box-shadow:0 6px 18px rgba(255,93,108,.3)}
+.fld{margin-bottom:10px}
+.fld label{display:flex;justify-content:space-between;font-size:11px;color:var(--faint);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+.fld input{width:100%;background:#0b1324;border:1px solid var(--line);border-radius:10px;color:var(--txt);
+  font:600 16px "JetBrains Mono";padding:12px;min-height:var(--tap);outline:none;transition:.2s}
+.fld input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(76,201,240,.15)}
+.pcts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:-2px 0 12px}
+.pct{border:1px solid var(--line);background:transparent;color:var(--mut);font:700 12px "JetBrains Mono";
+  padding:10px 0;min-height:var(--tap);border-radius:8px;cursor:pointer;transition:.15s}
+.pct:hover{color:var(--gold);border-color:rgba(255,182,72,.5)}
+.posinfo{font-size:12px;color:var(--mut);background:rgba(76,201,240,.07);border:1px solid rgba(76,201,240,.2);
+  border-radius:9px;padding:8px 11px;margin-bottom:12px}
+.pv{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:6px;margin-bottom:12px;font-size:12.5px}
+.pv .r{display:flex;justify-content:space-between;color:var(--mut)}
+.pv .r b{font-family:"JetBrains Mono";color:var(--txt);font-weight:600}
+.pv .r.total{border-top:1px solid var(--line);padding-top:6px;color:var(--txt);font-weight:700}
+.pv .r.total b{color:var(--gold);font-weight:800}
+.tmsg{font-size:12px;color:var(--down);min-height:16px;margin-bottom:8px}
+.gobtn{width:100%;border:none;border-radius:11px;padding:16px;min-height:var(--tap);font:800 16px "Golos Text";cursor:pointer;transition:.2s;color:#04120a}
+.gobtn.buy{background:linear-gradient(180deg,#34e07f,#1fae5f)}
+.gobtn.sell{background:linear-gradient(180deg,#ff7280,#e23a4e);color:#1c0407}
+.gobtn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.35)}
+.gobtn:active:not(:disabled){transform:translateY(0)}
+.gobtn:disabled{opacity:.4;cursor:not-allowed}
+.fineprint{font-size:10.5px;color:var(--faint);margin-top:10px;line-height:1.5}
+
+/* ── нижние вкладки ── */
+.bottom{max-width:1680px;margin:0 auto 10px;padding:0 22px}
+.bpanel{overflow:hidden}
+.btabs{display:flex;gap:4px;padding:12px 14px 0;border-bottom:1px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.btab{border:none;background:transparent;color:var(--mut);font:700 13px "Golos Text";padding:10px 16px;min-height:var(--tap);cursor:pointer;
+  border-bottom:2px solid transparent;transition:.18s;white-space:nowrap}
+.btab:hover{color:var(--txt)}
+.btab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.bcontent{padding:6px 14px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+th{text-align:left;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  padding:10px 10px 8px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid rgba(148,163,184,.07);font-family:"JetBrains Mono";font-size:12.5px}
+td.name{font-family:"Golos Text";font-weight:600;font-size:13px}
+tbody tr{transition:background .15s} tbody tr:hover{background:rgba(76,201,240,.05)}
+.bar{height:5px;border-radius:4px;background:rgba(148,163,184,.15);min-width:70px;position:relative;overflow:hidden}
+.bar i{position:absolute;inset:0;border-radius:4px;background:linear-gradient(90deg,var(--cyan),var(--gold))}
+.opbadge{font-family:"Golos Text";font-weight:800;font-size:11px;border-radius:6px;padding:2px 8px}
+.opbadge.b{color:var(--up);background:var(--up-dim)} .opbadge.s{color:var(--down);background:var(--down-dim)}
+.empty{padding:36px;text-align:center;color:var(--faint);font-size:14px}
+.empty .big{font-size:34px;display:block;margin-bottom:8px}
+.feegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;padding:14px 2px}
+.feecard{border:1px solid var(--line);border-radius:12px;padding:14px;transition:.2s}
+.feecard:hover{border-color:rgba(255,182,72,.45);transform:translateY(-2px)}
+.feecard b{font-family:"Unbounded";font-size:20px;color:var(--gold);display:block;margin-bottom:5px}
+.feecard span{font-size:12.5px;color:var(--mut);line-height:1.5}
+.warnbox{margin:4px 2px 6px;border:1px solid rgba(255,182,72,.4);background:rgba(255,182,72,.07);
+  border-radius:12px;padding:13px 16px;font-size:13px;color:#ffd9a0;line-height:1.55}
+
+footer{max-width:1680px;margin:0 auto;padding:8px 22px 26px;font-size:11px;color:var(--faint);line-height:1.6}
+.love{display:block;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--gold);font-weight:700;letter-spacing:.3px}
+
+/* модалка / тосты */
+.overlay{position:fixed;inset:0;background:rgba(6,10,20,.72);backdrop-filter:blur(4px);display:none;place-items:center;z-index:50;padding:20px}
+.overlay.show{display:grid}
+.modal{width:min(430px,92vw);background:linear-gradient(180deg,#152040,#0e1730);border:1px solid var(--line);
+  border-radius:16px;padding:22px;animation:pop .25s cubic-bezier(.2,.9,.3,1.3);max-height:calc(100vh - 40px);overflow-y:auto}
+@keyframes pop{from{transform:translateY(24px) scale(.96);opacity:0}}
+.modal h3{font-family:"Unbounded";font-size:16px;margin-bottom:14px}
+.mrow{display:flex;justify-content:space-between;font-size:13px;color:var(--mut);padding:6px 0;border-bottom:1px dashed rgba(148,163,184,.12)}
+.mrow b{font-family:"JetBrains Mono";color:var(--txt)}
+.mrow.final{border:none;padding-top:12px;font-weight:800;color:var(--txt)}
+.mrow.final b{color:var(--gold);font-size:16px}
+.mbtns{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:18px}
+.mbtns button{border-radius:10px;padding:14px;min-height:var(--tap);font:800 14px "Golos Text";cursor:pointer;transition:.18s;border:none}
+.mcancel{background:transparent;border:1px solid var(--line)!important;color:var(--mut)}
+.mcancel:hover{color:var(--txt)}
+.mok.buy{background:linear-gradient(180deg,#34e07f,#1fae5f);color:#04120a}
+.mok.sell{background:linear-gradient(180deg,#ff7280,#e23a4e);color:#1c0407}
+.mok:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.4)}
+#toasts{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;z-index:60;max-width:calc(100vw - 36px)}
+.toast{background:#152040;border:1px solid var(--line);border-left:4px solid var(--up);border-radius:11px;
+  padding:12px 16px;font-size:13px;max-width:340px;box-shadow:0 12px 30px rgba(0,0,0,.45);animation:tin .3s cubic-bezier(.2,.9,.3,1.2)}
+.toast.sell{border-left-color:var(--down)} .toast.info{border-left-color:var(--cyan)}
+.toast.out{animation:tout .3s forwards}
+@keyframes tin{from{transform:translateX(120%);opacity:0}}
+@keyframes tout{to{transform:translateX(120%);opacity:0}}
+
+/* ── мобильная адаптация ── */
+@media(max-width:1280px){
+  .layout{grid-template-columns:300px minmax(0,1fr)}
+  .rightcol{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;align-items:start}
+}
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr;gap:12px;padding:12px 14px}
+  .rightcol{grid-template-columns:1fr}
+  .alist{max-height:280px}
+  .bigprice{margin-left:0;text-align:left;width:100%}
+  .bigprice .sub2{justify-content:flex-start}
+  header{padding:12px 14px 8px}
+  .tape-wrap::before,.tape-wrap::after{width:40px}
+  .titem{padding:0 16px;font-size:12px}
+  .bottom{padding:0 14px}
+  .bcontent{padding:6px 10px 14px}
+  table{min-width:560px;font-size:12px}
+  th,td{padding:8px 8px}
+  footer{padding:8px 14px 26px}
+}
+@media(max-width:560px){
+  .brand h1{font-size:15px}
+  .brand small{font-size:9px}
+  .ghost-btn{padding:8px 12px;font-size:11px}
+  .status{font-size:11px;padding:6px 10px}
+  .atitle h2{font-size:15px}
+  .hilo{gap:12px;font-size:11px}
+  .acc .total{font-size:24px}
+  .plbadge{font-size:11px;padding:2px 7px}
+  .rankchip{font-size:10px;padding:2px 8px}
+  .aro{font-size:12px}
+  .sbtn{font-size:13px;padding:10px}
+  .fld input{font-size:14px;padding:10px}
+  .pct{font-size:11px;padding:8px 0}
+  .gobtn{font-size:14px;padding:14px}
+  .fineprint{font-size:10px}
+  .modal{padding:18px}
+  .mrow{font-size:12px}
+  .mrow.final b{font-size:14px}
+  .mbtns button{padding:12px;font-size:13px}
+  #toasts{right:10px;bottom:calc(10px + env(safe-area-inset-bottom));max-width:calc(100vw - 20px)}
+  .toast{padding:10px 14px;font-size:12px;max-width:280px}
+  .feegrid{grid-template-columns:1fr 1fr;gap:8px;padding:10px 0}
+  .feecard{padding:12px}
+  .feecard b{font-size:16px}
+  .feecard span{font-size:11px}
+  .warnbox{padding:11px 13px;font-size:12px}
+  .love{font-size:12px}
+  #chart{height:240px}
+  .ranges{top:6px;right:10px}
+  .rbtn{padding:6px 10px;font-size:10px}
+}
+@media(max-width:380px){
+  .brand h1{font-size:13px;letter-spacing:0}
+  .coin{width:38px;height:38px;font-size:20px}
+  .pcts{grid-template-columns:repeat(2,1fr)}
+  .feegrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="glow g1"></div><div class="glow g2"></div>
+
+<header>
+  <div class="brand">
+    <div class="coin">🐹</div>
+    <div><h1>ХОМЯК<em>·</em>ИНВЕСТ</h1><small>симулятор биржи · реальные котировки · виртуальные деньги</small></div>
+  </div>
+  <div class="hspace"></div>
+  <div class="status"><span class="dot" id="stDot"></span><span id="stTxt">Подключение к рынку…</span></div>
+  <button class="ghost-btn" id="resetBtn">⟲ Сбросить счёт</button>
+</header>
+
+<div class="tape-wrap"><div class="tape" id="tape"></div></div>
+
+<main class="layout">
+  <!-- список активов -->
+  <aside class="panel">
+    <div class="ptitle"><span class="live-dot"></span>Котировки <span id="updTime" style="margin-left:auto;font-family:'JetBrains Mono';letter-spacing:0;text-transform:none;color:var(--faint)"></span></div>
+    <div class="filters">
+      <button class="fbtn on" data-f="all">Все</button>
+      <button class="fbtn" data-f="crypto">Крипто</button>
+      <button class="fbtn" data-f="stock">Акции</button>
+    </div>
+    <div class="alist" id="alist"></div>
+    <div class="listnote">Крипто — live CoinGecko (шаг ~20 с). Акции — симуляция случайного блуждания (метка СИМ).</div>
+  </aside>
+
+  <!-- центр -->
+  <section style="display:flex;flex-direction:column;gap:16px;min-width:0">
+    <div class="panel">
+      <div class="ahead">
+        <div class="aicon" id="hIcon" style="--c:#f7931a">₿</div>
+        <div class="atitle">
+          <h2 id="hName">Биткоин</h2>
+          <div class="sub"><span class="mono" id="hSym">BTC</span><span id="hType" class="simbadge" style="color:var(--up);border-color:rgba(47,213,117,.4)">LIVE</span></div>
+        </div>
+        <div class="bigprice">
+          <div class="p" id="hPrice">—</div>
+          <div class="sub2"><span class="chip up" id="hChg">0,0%</span></div>
+        </div>
+      </div>
+      <div class="hilo">
+        <span>Макс. 24ч: <b id="hHigh" class="up">—</b></span>
+        <span>Мин. 24ч: <b id="hLow" class="down">—</b></span>
+        <span>Покупка (ask): <b id="hAsk">—</b></span>
+        <span>Продажа (bid): <b id="hBid">—</b></span>
+        <span>Спред: <b>0,30%</b></span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="chartbox">
+        <div class="ranges">
+          <button class="rbtn" data-r="1h">1Ч</button>
+          <button class="rbtn on" data-r="24h">24Ч</button>
+        </div>
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- счёт и торговля -->
+  <aside class="rightcol">
+    <div class="panel acc">
+      <div class="lbl">Итого по счёту</div>
+      <div class="total" id="accTotal">100 000 ₽</div>
+      <div class="plrow"><span class="plbadge up" id="accPl">+0 ₽ · 0,0%</span><span class="rankchip" id="accRank">🐹 Хомячок-новичок</span></div>
+      <div class="rows">
+        <div class="aro"><span>Свободные средства</span><b id="accCash">—</b></div>
+        <div class="aro"><span>Стоимость активов</span><b id="accPos">—</b></div>
+        <div class="aro"><span>Реализованный результат</span><b id="accReal">—</b></div>
+        <div class="aro"><span>Удержано НДФЛ (13%)</span><b id="accTax">—</b></div>
+        <div class="aro"><span>Комиссии за всё время</span><b id="accFees">—</b></div>
+      </div>
+    </div>
+
+    <div class="panel trade">
+      <div class="ptitle" style="padding:0 0 2px">Новый ордер</div>
+      <div class="seg">
+        <button class="sbtn buy on" id="sideBuy">Купить</button>
+        <button class="sbtn sell" id="sideSell">Продать</button>
+      </div>
+      <div class="posinfo" id="posInfo" style="display:none"></div>
+      <div class="fld"><label><span>Сумма</span><span>₽</span></label><input id="inAmt" inputmode="decimal" placeholder="0,00" autocomplete="off"></div>
+      <div class="fld"><label><span>Количество</span><span id="qtyUnit">BTC</span></label><input id="inQty" inputmode="decimal" placeholder="0" autocomplete="off"></div>
+      <div class="pcts">
+        <button class="pct" data-p="0.25">25%</button><button class="pct" data-p="0.5">50%</button>
+        <button class="pct" data-p="0.75">75%</button><button class="pct" data-p="1">MAX</button>
+      </div>
+      <div class="pv">
+        <div class="r"><span>Цена исполнения</span><b id="pvPx">—</b></div>
+        <div class="r"><span>Сумма сделки</span><b id="pvAmt">—</b></div>
+        <div class="r"><span>Комиссия брокера (0,3%)</span><b id="pvBrk">—</b></div>
+        <div class="r"><span>Сбор биржи (0,03%)</span><b id="pvEx">—</b></div>
+        <div class="r" id="pvTaxRow" style="display:none"><span>НДФЛ 13% с прибыли</span><b id="pvTax">—</b></div>
+        <div class="r total"><span id="pvTotLbl">К списанию</span><b id="pvTot">—</b></div>
+      </div>
+      <div class="tmsg" id="tMsg"></div>
+      <button class="gobtn buy" id="goBtn" disabled>Купить BTC</button>
+      <div class="fineprint">Ордер исполняется мгновенно по текущей котировке. Тариф «Хомяк Базовый»: 0,3% (мин. 1 ₽) + сбор биржи, спред ±0,15%, НДФЛ 13% с прибыли при продаже. Это игра — реальные сделки не совершаются.</div>
+    </div>
+  </aside>
+</main>
+
+<!-- вкладки -->
+<section class="bottom">
+  <div class="panel bpanel">
+    <div class="btabs">
+      <button class="btab on" data-t="port">💼 Портфель</button>
+      <button class="btab" data-t="hist">📜 История операций</button>
+      <button class="btab" data-t="fees">📋 Тариф и правила</button>
+    </div>
+    <div class="bcontent" id="tabPort"></div>
+    <div class="bcontent" id="tabHist" style="display:none"></div>
+    <div class="bcontent" id="tabFees" style="display:none">
+      <div class="feegrid">
+        <div class="feecard"><b>0,3%</b><span>Комиссия брокера с каждой сделки, минимум 1 ₽ за ордер.</span></div>
+        <div class="feecard"><b>0,03%</b><span>Биржевой сбор — добавляется к комиссии брокера при исполнении.</span></div>
+        <div class="feecard"><b>±0,15%</b><span>Спред: покупка по ask (+0,15% к цене), продажа по bid (−0,15%).</span></div>
+        <div class="feecard"><b>13%</b><span>НДФЛ удерживается автоматически с положительного финансового результата при продаже.</span></div>
+        <div class="feecard"><b>0 сек</b><span>Мгновенное исполнение по последней котировке. Акции торгуются целыми лотами (1 шт.).</span></div>
+      </div>
+      <div class="warnbox">⚠️ Это игра. Баланс, ордера и прибыль — виртуальные. Приложение ничего не покупает и не отправляет заявки на биржу. Котировки криптовалют предоставлены CoinGecko с задержкой; котировки акций симулированы.</div>
+    </div>
+  </div>
+</section>
+
+<footer>Хомяк-Инвест · симулятор инвестиций · данные о криптовалютах: api.coingecko.com (RUB) · не является инвестиционной рекомендацией 🐹<span class="love">Люблю свою девушку Любу 😘</span></footer>
+
+<!-- подтверждение ордера -->
+<div class="overlay" id="ovl">
+  <div class="modal">
+    <h3 id="mTitle">Подтверждение ордера</h3>
+    <div id="mRows"></div>
+    <div class="mbtns">
+      <button class="mcancel" id="mCancel">Отмена</button>
+      <button class="mok buy" id="mOk">Подтвердить</button>
+    </div>
+  </div>
+</div>
+<div id="toasts"></div>
+
+<script>
+'use strict';
+/* ═══════════ константы брокера ═══════════ */
+const START=100000, BRK=0.003, BRK_MIN=1, EXCH=0.0003, ASK_K=1.0015, BID_K=0.9985, TAX=0.13, LS='homyak-invest-v1';
+
+const CRYPTO=[
+  {sym:'BTC', name:'Биткоин',  id:'bitcoin',          icon:'₿', color:'#f7931a', base:9400000},
+  {sym:'ETH', name:'Эфириум',  id:'ethereum',         icon:'Ξ', color:'#8ba2fb', base:310000},
+  {sym:'TON', name:'Toncoin',  id:'the-open-network', icon:'T', color:'#4cc9f0', base:420},
+  {sym:'SOL', name:'Солана',   id:'solana',           icon:'S', color:'#b888f8', base:14500},
+  {sym:'XRP', name:'Рипл',     id:'ripple',           icon:'X', color:'#9aa7ff', base:210},
+  {sym:'DOGE',name:'Догикоин', id:'dogecoin',         icon:'Ð', color:'#e6c455', base:17.5},
+];
+const STOCKS=[
+  {sym:'SBER',name:'Сбербанк',icon:'С',color:'#3ecf8e',base:305.4, vol:.0009},
+  {sym:'YDEX',name:'Яндекс',  icon:'Я',color:'#ff5d6c',base:4362,  vol:.0012},
+  {sym:'LKOH',name:'Лукойл',  icon:'Л',color:'#ffb648',base:6418,  vol:.0008},
+  {sym:'GAZP',name:'Газпром', icon:'Г',color:'#6ea8ff',base:128.6, vol:.0010},
+  {sym:'OZON',name:'Озон',    icon:'O',color:'#4c7dff',base:3120,  vol:.0014},
+  {sym:'VTBR',name:'ВТБ',     icon:'В',color:'#38b6ff',base:96.4,  vol:.0011},
+];
+const ASSETS=[...CRYPTO.map(c=>({...c,type:'crypto'})),...STOCKS.map(s=>({...s,type:'stock',sim:true}))];
+const bySym=Object.fromEntries(ASSETS.map(a=>[a.sym,a]));
+const MKT={}; ASSETS.forEach(a=>MKT[a.sym]={p:a.base,ch:0,day:[],dir:0});
+
+let state, current='BTC', side='buy', range='24h', filter='all',
+    LIVE=false, fallbackDone=false, lastQuote=null, chartCache=[], hoverIdx=null;
+
+/* ═══════════ состояние ═══════════ */
+function defState(){return{cash:START,hold:{},ops:[],fees:0,tax:0,realized:0}}
+try{state=Object.assign(defState(),JSON.parse(localStorage.getItem(LS)||'{}'))}catch(e){state=defState()}
+function save(){localStorage.setItem(LS,JSON.stringify(state))}
+
+/* ═══════════ формат ═══════════ */
+const fmtM=n=>n.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
+function fmtP(p){const d=p>=100000?0:p>=1?2:p>=0.01?4:6;return p.toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function fmtQ(q,sym){return bySym[sym].type==='stock'?Math.round(q).toLocaleString('ru-RU'):(+q.toFixed(8)).toString()}
+const fmtPct=v=>(v>=0?'+':'')+v.toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+const tShort=t=>new Date(t).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+const parseN=s=>parseFloat(String(s).replace(/[\s\u00A0]/g,'').replace(',','.'));
+function rank(p){if(p<=-20)return'🐹💸 Хомяк в панике';if(p<0)return'🐹📉 Грустный хомяк';if(p<5)return'🐹 Хомячок-новичок';
+  if(p<15)return'🐹📈 Матёрый хомяк';if(p<40)return'🐺 Волк с Тверской';return'👑 Легенда биржи'}
+
+/* ═══════════ симуляция акций / оффлайн ═══════════ */
+function seedSim(a){const n=288,arr=[a.base*(1+(Math.random()-.5)*.04)];
+  for(let i=1;i<n;i++)arr.push(arr[i-1]*(1+(Math.random()-.497)*(a.vol||.0012)*6));
+  const now=Date.now();MKT[a.sym].day=arr.map((p,i)=>({t:now-(n-1-i)*5*60e3,p}));
+  MKT[a.sym].p=arr[n-1];MKT[a.sym].ch=(arr[n-1]/arr[0]-1)*100;MKT[a.sym].dir=0}
+STOCKS.forEach(seedSim);
+function fallbackSim(){if(fallbackDone)return;fallbackDone=true;
+  CRYPTO.forEach(c=>{c.sim=true;seedSim(c)});
+  toast('📡 Нет связи с биржей — включена оффлайн-симуляция котировок','info')}
+function simTick(){const now=Date.now();
+  ASSETS.forEach(a=>{if(!a.sim)return;const m=MKT[a.sym];
+    m.p*=Math.exp((Math.random()+Math.random()+Math.random()-1.5)*(a.vol||.0012)*1.9);
+    m.day.push({t:now,p:m.p});if(m.day.length>1500)m.day.shift();
+    m.ch=(m.p/m.day[0].p-1)*100;m.dir=0});
+  afterPrices()}
+
+/* ═══════════ живые котировки ═══════════ */
+async function fetchCrypto(){
+  try{
+    const live=CRYPTO.filter(c=>!c.sim);
+    if(live.length){
+      const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids='+live.map(c=>c.id).join(',')+'&vs_currencies=rub&include_24hr_change=true');
+      if(!r.ok)throw 0; const j=await r.json();
+      live.forEach(c=>{const d=j[c.id];if(!d||!d.rub)return;const m=MKT[c.sym],old=m.p;
+        m.p=d.rub;m.ch=d.rub_24h_change||0;m.dir=old?Math.sign(d.rub-old):0;
+        const last=m.day[m.day.length-1];
+        if(!last||now()-last.t>15e3)m.day.push({t:now(),p:d.rub});
+        if(m.day.length>1400)m.day.shift()});
+      LIVE=true;fallbackDone=false;
+    }
+    setStatus(true);document.getElementById('updTime').textContent=new Date().toLocaleTimeString('ru-RU');
+    afterPrices();
+  }catch(e){
+    if(!LIVE)fallbackSim();
+    setStatus(false);
+  }
+}
+const now=()=>Date.now();
+function setStatus(ok){const d=document.getElementById('stDot'),t=document.getElementById('stTxt');
+  d.classList.toggle('off',!ok);
+  t.textContent=ok?'LIVE · котировки CoinGecko':'СИМУЛЯЦИЯ · нет сети'}
+
+async function loadDay(a){
+  if(a.type!=='crypto'||a.sim||MKT[a.sym].loadedDay)return;
+  try{const r=await fetch(`https://api.coingecko.com/api/v3/coins/${a.id}/market_chart?vs_currency=rub&days=1`);
+    const j=await r.json();if(!j.prices)return;
+    MKT[a.sym].day=j.prices.map(([t,p])=>({t,p}));MKT[a.sym].loadedDay=true;
+    updateHead();drawChart()}catch(e){}
+}
+
+/* ═══════════ бегущая строка ═══════════ */
+const tapeRefs=[];
+(function buildTape(){const tape=document.getElementById('tape');
+  for(let copy=0;copy<2;copy++)ASSETS.forEach(a=>{
+    const s=document.createElement('span');s.className='titem';
+    s.innerHTML=`<b>${a.sym}</b><span class="tp"></span><span class="tc"></span>`;
+    tape.appendChild(s);tapeRefs.push({sym:a.sym,p:s.children[1],c:s.children[2]})})})();
+function updateTape(){tapeRefs.forEach(r=>{const m=MKT[r.sym];if(!m||!m.p)return;
+  r.p.textContent=fmtP(m.p)+' ₽';
+  r.c.textContent=fmtPct(m.ch);r.c.className='tc '+(m.ch>=0?'up':'down')})}
+
+/* ═══════════ список активов ═══════════ */
+document.querySelectorAll('.fbtn').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');filter=b.dataset.f;renderList()});
+function renderList(){
+  const box=document.getElementById('alist');box.innerHTML='';
+  ASSETS.filter(a=>filter==='all'||a.type===filter).forEach(a=>{
+    const m=MKT[a.sym],up=m.ch>=0;
+    const row=document.createElement('div');
+    row.className='arow'+(a.sym===current?' sel':'')+(m.dir>0?' flash-up':m.dir<0?' flash-dn':'');
+    row.innerHTML=`<div class="aicon" style="--c:${a.color}">${a.icon}</div>
+      <div class="ainfo"><b>${a.sym}${a.sim?' <span class="simbadge">СИМ</span>':''}</b><span>${a.name}</span></div>
+      <canvas class="spark" width="140" height="36"></canvas>
+      <div class="aprice"><b>${fmtP(m.p)} ₽</b><span class="chip ${up?'up':'down'}">${fmtPct(m.ch)}</span></div>`;
+    row.onclick=()=>selectAsset(a.sym);
+    box.appendChild(row);
+    drawSpark(row.querySelector('.spark'),m.day.slice(-60),up)});
+}
+function drawSpark(cv,data,up){if(!cv||data.length<2)return;const c=cv.getContext('2d');
+  c.clearRect(0,0,140,36);let mn=1/0,mx=-1/0;data.forEach(d=>{mn=Math.min(mn,d.p);mx=Math.max(mx,d.p)});
+  if(mx===mn)mx+=1;const X=i=>2+136*i/(data.length-1),Y=p=>3+30*(1-(p-mn)/(mx-mn));
+  c.beginPath();data.forEach((d,i)=>i?c.lineTo(X(i),Y(d.p)):c.moveTo(X(i),Y(d.p)));
+  c.strokeStyle=up?'#2fd575':'#ff5d6c';c.lineWidth=1.6;c.stroke()}
+
+/* ═══════════ заголовок актива ═══════════ */
+function selectAsset(sym){current=sym;hoverIdx=null;
+  document.getElementById('inAmt').value='';document.getElementById('inQty').value='';
+  updateHead();drawChart();updatePreview();renderList();loadDay(bySym[sym])}
+function updateHead(){const a=bySym[current],m=MKT[current];
+  const ic=document.getElementById('hIcon');ic.textContent=a.icon;ic.style.setProperty('--c',a.color);
+  document.getElementById('hName').textContent=a.name;
+  document.getElementById('hSym').textContent=a.sym+(a.type==='stock'?' · MOEX (сим)':' / RUB');
+  const tp=document.getElementById('hType');
+  if(a.sim){tp.textContent=a.type==='stock'?'СИМУЛЯЦИЯ':'СИМУЛЯЦИЯ (оффлайн)';tp.style.cssText='color:var(--cyan);border-color:rgba(76,201,240,.4)'}
+  else{tp.textContent='LIVE';tp.style.cssText='color:var(--up);border-color:rgba(47,213,117,.4)'}
+  const pe=document.getElementById('hPrice');pe.textContent=fmtP(m.p)+' ₽';
+  pe.classList.remove('fu','fd');if(m.dir>0)pe.classList.add('fu');if(m.dir<0)pe.classList.add('fd');
+  const ch=document.getElementById('hChg');ch.textContent=fmtPct(m.ch);ch.className='chip '+(m.ch>=0?'up':'down');
+  const day=m.day||[];
+  if(day.length>1){let hi=-1/0,lo=1/0;day.forEach(d=>{hi=Math.max(hi,d.p);lo=Math.min(lo,d.p)});
+    document.getElementById('hHigh').textContent=fmtP(hi)+' ₽';
+    document.getElementById('hLow').textContent=fmtP(lo)+' ₽'}
+  document.getElementById('hAsk').textContent=fmtP(m.p*ASK_K)+' ₽';
+  document.getElementById('hBid').textContent=fmtP(m.p*BID_K)+' ₽';
+  document.getElementById('qtyUnit').textContent=a.sym}
+
+/* ═══════════ график ═══════════ */
+const PADL=10,PADR=68,PADT=14,PADB=22;
+document.querySelectorAll('.rbtn').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.rbtn').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');range=b.dataset.r;drawChart()});
+function chartData(){let d=(MKT[current].day||[]).slice();
+  if(range==='1h'){const cut=Date.now()-3600e3;d=d.filter(x=>x.t>=cut)}return d}
+function drawChart(hi){
+  const cv=document.getElementById('chart'),ctx=cv.getContext('2d');
+  const w=cv.clientWidth,h=cv.clientHeight,dpr=devicePixelRatio||1;
+  if(cv.width!==Math.round(w*dpr)){cv.width=w*dpr;cv.height=h*dpr}
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  const data=chartData();chartCache=data;
+  if(data.length<2){ctx.fillStyle='#5b6b8c';ctx.font='13px "Golos Text"';ctx.textAlign='center';
+    ctx.fillText('Загрузка графика…',w/2,h/2);return}
+  let mn=1/0,mx=-1/0;data.forEach(d=>{mn=Math.min(mn,d.p);mx=Math.max(mx,d.p)});
+  if(mx===mn){mx*=1.001;mn*=.999}
+  const pad=(mx-mn)*.08;mn-=pad;mx+=pad;
+  const X=i=>PADL+(w-PADL-PADR)*i/(data.length-1),Y=p=>PADT+(h-PADT-PADB)*(1-(p-mn)/(mx-mn));
+  const up=data[data.length-1].p>=data[0].p,col=up?'#2fd575':'#ff5d6c';
+  ctx.strokeStyle='rgba(148,163,184,.1)';ctx.fillStyle='#5b6b8c';ctx.font='11px "JetBrains Mono"';ctx.textAlign='left';
+  for(let g=0;g<=4;g++){const p=mn+(mx-mn)*g/4,y=Y(p);
+    ctx.beginPath();ctx.moveTo(PADL,y);ctx.lineTo(w-PADR,y);ctx.stroke();
+    ctx.fillText(p.toLocaleString('ru-RU',{maximumFractionDigits:p<10?2:0}),w-PADR+6,y+4)}
+  const grad=ctx.createLinearGradient(0,PADT,0,h-PADB);
+  grad.addColorStop(0,up?'rgba(47,213,117,.26)':'rgba(255,93,108,.26)');grad.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath();ctx.moveTo(X(0),Y(data[0].p));data.forEach((d,i)=>ctx.lineTo(X(i),Y(d.p)));
+  ctx.lineTo(X(data.length-1),h-PADB);ctx.lineTo(X(0),h-PADB);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+  ctx.beginPath();data.forEach((d,i)=>i?ctx.lineTo(X(i),Y(d.p)):ctx.moveTo(X(i),Y(d.p)));
+  ctx.strokeStyle=col;ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
+  ctx.beginPath();ctx.arc(X(data.length-1),Y(data[data.length-1].p),3.5,0,7);ctx.fillStyle=col;ctx.fill();
+  ctx.fillStyle='#5b6b8c';ctx.textAlign='center';
+  ctx.fillText(tShort(data[0].t),PADL+28,h-6);ctx.fillText(tShort(data[data.length-1].t),w-PADR-28,h-6);
+  if(hi!=null&&data[hi]){const x=X(hi),y=Y(data[hi].p);
+    ctx.setLineDash([4,4]);ctx.strokeStyle='rgba(232,237,247,.35)';
+    ctx.beginPath();ctx.moveTo(x,PADT);ctx.lineTo(x,h-PADB);ctx.stroke();ctx.setLineDash([]);
+    ctx.beginPath();ctx.arc(x,y,4.5,0,7);ctx.fillStyle='#fff';ctx.fill();
+    ctx.beginPath();ctx.arc(x,y,3,0,7);ctx.fillStyle=col;ctx.fill();
+    const txt=fmtP(data[hi].p)+' ₽ · '+tShort(data[hi].t);ctx.font='700 11px "JetBrains Mono"';
+    const tw=ctx.measureText(txt).width+16,tx=Math.min(Math.max(x-tw/2,PADL),w-PADR-tw);
+    ctx.fillStyle='#152040';ctx.strokeStyle='rgba(148,163,184,.3)';
+    ctx.beginPath();ctx.roundRect(tx,PADT,tw,22,6);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#e8edf7';ctx.textAlign='left';ctx.fillText(txt,tx+8,PADT+15)}
+}
+const cvEl=document.getElementById('chart');
+cvEl.addEventListener('pointermove',e=>{const r=cvEl.getBoundingClientRect(),data=chartCache;
+  if(data.length<2)return;const x=e.clientX-r.left;
+  let i=Math.round((x-PADL)/(r.width-PADL-PADR)*(data.length-1));
+  i=Math.max(0,Math.min(data.length-1,i));hoverIdx=i;drawChart(i)});
+cvEl.addEventListener('pointerleave',()=>{hoverIdx=null;drawChart()});
+window.addEventListener('resize',()=>drawChart(hoverIdx));
+
+/* ═══════════ торговля ═══════════ */
+const amtEl=document.getElementById('inAmt'),qtyEl=document.getElementById('inQty');
+document.getElementById('sideBuy').onclick=()=>setSide('buy');
+document.getElementById('sideSell').onclick=()=>setSide('sell');
+function setSide(s){side=s;
+  document.getElementById('sideBuy').classList.toggle('on',s==='buy');
+  document.getElementById('sideSell').classList.toggle('on',s==='sell');
+  updatePreview()}
+amtEl.addEventListener('input',()=>{const px=execPx();if(!px)return sync('amt');sync('amt')});
+qtyEl.addEventListener('input',()=>sync('qty'));
+function execPx(){const m=MKT[current];if(!m||!m.p)return null;return side==='buy'?m.p*ASK_K:m.p*BID_K}
+function sync(src){const px=execPx();if(!px)return;const a=bySym[current];
+  if(src==='amt'){let v=parseN(amtEl.value);
+    if(!isFinite(v)||v<=0){qtyEl.value='';updatePreview();return}
+    let q=v/px;
+    if(a.type==='stock'){q=Math.floor(q);if(q>0)amtEl.value=fmtM(q*px)}
+    qtyEl.value=q>0?fmtQ(q,current):''}
+  else{let q=parseN(qtyEl.value);
+    if(!isFinite(q)||q<=0){amtEl.value='';updatePreview();return}
+    amtEl.value=fmtM(q*px)}
+  updatePreview()}
+document.querySelectorAll('.pct').forEach(b=>b.onclick=()=>{
+  const p=+b.dataset.p;
+  if(side==='buy'){
+    const amt=Math.floor(state.cash*p/(1+BRK+EXCH+0.0001)*100)/100;
+    amtEl.value=amt>0?fmtM(amt):'';sync('amt');
+  }else{
+    const h=state.hold[current];if(!h)return;
+    let q=h.qty*p;if(bySym[current].type==='stock')q=Math.floor(q);
+    qtyEl.value=q>0?fmtQ(q,current):'';sync('qty');
+  }
+  if(lastQuote)openConfirm();
+});
+
+function computeQuote(){
+  const a=bySym[current],m=MKT[current];if(!m||!m.p)return null;
+  const px=execPx();let qty=parseN(qtyEl.value),amount=parseN(amtEl.value);
+  if(!isFinite(qty)||qty<=0){if(isFinite(amount)&&amount>0)qty=amount/px;else qty=0;
+    if(a.type==='stock')qty=Math.floor(qty)}
+  amount=qty*px;
+  const broker=Math.max(BRK_MIN,amount*BRK),exch=amount*EXCH,fees=broker+exch;
+  const q={side,sym:current,qty,px,amount,broker,exch,fees};
+  if(side==='buy'){q.total=amount+fees}
+  else{const h=state.hold[current];q.avg=h?h.invested/h.qty:0;
+    const profit=amount-fees-q.avg*qty;q.tax=profit>0?profit*TAX:0;q.net=amount-fees-q.tax}
+  return q}
+function updatePreview(){
+  const a=bySym[current],m=MKT[current],h=state.hold[current];
+  const pi=document.getElementById('posInfo');
+  if(h&&h.qty>1e-9){pi.style.display='block';
+    pi.innerHTML=`В портфеле: <b class="mono">${fmtQ(h.qty,current)} ${current}</b> · ср. цена <b class="mono">${fmtP(h.invested/h.qty)} ₽</b>`}
+  else pi.style.display='none';
+  const q=computeQuote();lastQuote=null;
+  const set=(id,v)=>document.getElementById(id).textContent=v;
+  set('pvPx',q?fmtP(q.px)+' ₽':'—');set('pvAmt',q&&q.amount?fmtM(q.amount)+' ₽':'—');
+  set('pvBrk',q&&q.amount?fmtM(q.broker)+' ₽':'—');set('pvEx',q&&q.amount?fmtM(q.exch)+' ₽':'—');
+  const taxRow=document.getElementById('pvTaxRow');
+  let msg='',ok=false;
+  if(!q||q.qty<=0||q.amount<1){msg='Введите сумму (мин. 10 ₽) или количество'}
+  else{
+    taxRow.style.display=side==='sell'?'flex':'none';
+    if(side==='sell')set('pvTax',q.tax>0?'−'+fmtM(q.tax)+' ₽':'0 ₽ (нет прибыли)');
+    set('pvTot',side==='buy'?fmtM(q.total)+' ₽':fmtM(q.net)+' ₽');
+    document.getElementById('pvTotLbl').textContent=side==='buy'?'К списанию со счёта':'К зачислению на счёт';
+    if(q.amount<10)msg='Минимальная сумма ордера — 10 ₽';
+    else if(side==='buy'&&q.total>state.cash+0.005)msg='Недостаточно свободных средств';
+    else if(side==='sell'&&(!h||q.qty>h.qty+1e-9))msg='Недостаточно активов в портфеле';
+    else{ok=true;lastQuote=q}
+  }
+  if(!ok){set('pvTot','—')}
+  document.getElementById('tMsg').textContent=msg;
+  const btn=document.getElementById('goBtn');
+  btn.disabled=!ok;btn.className='gobtn '+side;
+  btn.textContent=(side==='buy'?'Купить ':'Продать ')+current;
+}
+
+/* модалка */
+let pendingQuote=null;
+function openConfirm(){
+  if(!lastQuote)return;
+  pendingQuote=lastQuote;const q=pendingQuote,a=bySym[q.sym];
+  const rows=[
+    ['Операция',side==='buy'?'Покупка':'Продажа'],['Актив',`${a.name} (${q.sym})`],
+    ['Количество',fmtQ(q.qty,q.sym)+' шт'],['Цена исполнения',fmtP(q.px)+' ₽'],
+    ['Сумма сделки',fmtM(q.amount)+' ₽'],['Комиссия брокера','−'+fmtM(q.broker)+' ₽'],
+    ['Сбор биржи','−'+fmtM(q.exch)+' ₽']];
+  if(side==='sell')rows.push(['НДФЛ 13%',q.tax>0?'−'+fmtM(q.tax)+' ₽':'0 ₽']);
+  let html=rows.map(r=>`<div class="mrow"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
+  html+=`<div class="mrow final"><span>${side==='buy'?'Спишется со счёта':'Поступит на счёт'}</span><b>${fmtM(side==='buy'?q.total:q.net)} ₽</b></div>`;
+  document.getElementById('mRows').innerHTML=html;
+  document.getElementById('mTitle').textContent=(side==='buy'?'Покупка ':'Продажа ')+q.sym;
+  document.getElementById('mOk').className='mok '+side;
+  document.getElementById('ovl').classList.add('show')}
+document.getElementById('goBtn').onclick=openConfirm;
+document.getElementById('mOk').onclick=executeTrade;
+document.getElementById('mCancel').onclick=closeModal;
+document.getElementById('ovl').addEventListener('click',e=>{if(e.target.id==='ovl')closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+function closeModal(){document.getElementById('ovl').classList.remove('show');pendingQuote=null}
+
+function executeTrade(){const q=pendingQuote||lastQuote;if(!q)return;
+  if(q.side==='buy'){
+    state.cash-=q.total;
+    const h=state.hold[q.sym]||(state.hold[q.sym]={qty:0,invested:0});
+    h.qty+=q.qty;h.invested+=q.total;state.fees+=q.fees;
+    state.ops.unshift({t:Date.now(),side:'buy',sym:q.sym,qty:q.qty,px:q.px,amount:q.amount,fees:q.fees,tax:0,total:q.total});
+    toast(`✅ Куплено ${fmtQ(q.qty,q.sym)} ${q.sym} за <b class="mono">${fmtM(q.total)} ₽</b>`,'buy');
+  }else{
+    const h=state.hold[q.sym];
+    state.cash+=q.net;h.qty-=q.qty;h.invested-=q.avg*q.qty;
+    state.realized+=q.amount-q.fees-q.avg*q.qty;
+    if(h.qty<1e-9)delete state.hold[q.sym];
+    state.fees+=q.fees;state.tax+=q.tax;
+    state.ops.unshift({t:Date.now(),side:'sell',sym:q.sym,qty:q.qty,px:q.px,amount:q.amount,fees:q.fees,tax:q.tax,total:q.net});
+    toast(`💰 Продано ${fmtQ(q.qty,q.sym)} ${q.sym}`+(q.tax>0?`, НДФЛ удержан <b class="mono">${fmtM(q.tax)} ₽</b>`:''),'sell');
+  }
+  if(state.ops.length>200)state.ops.length=200;
+  save();closeModal();amtEl.value='';qtyEl.value='';
+  afterPrices();renderHistory()}
+
+/* ═══════════ счёт / портфель / история ═══════════ */
+function portfolioValue(){let v=0;for(const s in state.hold){const h=state.hold[s];
+  v+=h.qty*(MKT[s].p*BID_K)}return v}
+function renderAccount(){const pos=portfolioValue(),total=state.cash+pos,pl=total-START,plp=pl/START*100;
+  document.getElementById('accTotal').textContent=fmtM(total)+' ₽';
+  const pb=document.getElementById('accPl');
+  pb.textContent=(pl>=0?'+':'−')+fmtM(Math.abs(pl))+' ₽ · '+fmtPct(plp);
+  pb.className='plbadge '+(pl>=0?'up':'down');
+  document.getElementById('accRank').textContent=rank(plp);
+  document.getElementById('accCash').textContent=fmtM(state.cash)+' ₽';
+  document.getElementById('accPos').textContent=fmtM(pos)+' ₽';
+  const re=document.getElementById('accReal');re.textContent=(state.realized>=0?'+':'')+fmtM(state.realized)+' ₽';
+  re.className=state.realized>=0?'up':'down';
+  document.getElementById('accTax').textContent=fmtM(state.tax)+' ₽';
+  document.getElementById('accFees').textContent=fmtM(state.fees)+' ₽'}
+function renderPortfolio(){const box=document.getElementById('tabPort');
+  const syms=Object.keys(state.hold).filter(s=>state.hold[s].qty>1e-9);
+  if(!syms.length){box.innerHTML='<div class="empty"><span class="big">🐹</span>Портфель пуст. Выберите актив слева и купите первую позицию!</div>';return}
+  const pos=portfolioValue();let rows='';
+  syms.sort((a,b)=>state.hold[b].qty*MKT[b].p-state.hold[a].qty*MKT[a].p).forEach(s=>{
+    const h=state.hold[s],bid=MKT[s].p*BID_K,avg=h.invested/h.qty,val=h.qty*bid;
+    const pl=val-h.invested,plp=h.invested>0?pl/h.invested*100:0,share=pos>0?val/pos*100:0;
+    rows+=`<tr style="cursor:pointer" onclick="selectAsset('${s}')">
+      <td class="name"><b>${s}</b> · ${bySym[s].name}</td>
+      <td>${fmtQ(h.qty,s)}</td><td>${fmtP(avg)}</td><td>${fmtM(h.invested)}</td>
+      <td>${fmtP(bid)}</td><td><b>${fmtM(val)}</b></td>
+      <td class="${pl>=0?'up':'down'}">${(pl>=0?'+':'−')+fmtM(Math.abs(pl))}</td>
+      <td class="${pl>=0?'up':'down'}">${fmtPct(plp)}</td>
+      <td><div class="bar"><i style="width:${share}%"></i></div><span style="font-size:10px;color:var(--faint)">${share.toFixed(1)}%</span></td></tr>`});
+  box.innerHTML=`<table><thead><tr><th>Актив</th><th>Кол-во</th><th>Ср. цена ₽</th><th>Вложено ₽</th><th>Тек. цена</th><th>Стоимость ₽</th><th>P&L ₽</th><th>P&L %</th><th>Доля</th></tr></thead><tbody>${rows}</tbody></table>`}
+function renderHistory(){const box=document.getElementById('tabHist');
+  if(!state.ops.length){box.innerHTML='<div class="empty"><span class="big">📜</span>Операций пока не было</div>';return}
+  let rows='';state.ops.slice(0,100).forEach(o=>{
+    rows+=`<tr><td>${new Date(o.t).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</td>
+      <td><span class="opbadge ${o.side==='buy'?'b':'s'}">${o.side==='buy'?'ПОКУПКА':'ПРОДАЖА'}</span></td>
+      <td class="name"><b>${o.sym}</b></td><td>${fmtQ(o.qty,o.sym)}</td><td>${fmtP(o.px)}</td>
+      <td>${fmtM(o.amount)}</td><td class="down">−${fmtM(o.fees)}</td>
+      <td>${o.tax>0?'<span class="down">−'+fmtM(o.tax)+'</span>':'—'}</td>
+      <td><b>${fmtM(o.total)}</b></td></tr>`});
+  box.innerHTML=`<table><thead><tr><th>Время</th><th>Операция</th><th>Актив</th><th>Кол-во</th><th>Цена ₽</th><th>Сумма ₽</th><th>Комиссия ₽</th><th>НДФЛ ₽</th><th>Итог ₽</th></tr></thead><tbody>${rows}</tbody></table>`}
+
+/* вкладки */
+document.querySelectorAll('.btab').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.btab').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  const t=b.dataset.t;
+  document.getElementById('tabPort').style.display=t==='port'?'':'none';
+  document.getElementById('tabHist').style.display=t==='hist'?'':'none';
+  document.getElementById('tabFees').style.display=t==='fees'?'':'none'});
+
+/* сброс */
+document.getElementById('resetBtn').onclick=()=>{
+  if(confirm('Сбросить игру? Баланс вернётся к 100 000 ₽, портфель и история будут удалены.')){
+    localStorage.removeItem(LS);location.reload()}};
+
+/* тосты */
+function toast(html,cls){const box=document.getElementById('toasts'),d=document.createElement('div');
+  d.className='toast '+(cls||'');d.innerHTML=html;box.appendChild(d);
+  setTimeout(()=>{d.classList.add('out');setTimeout(()=>d.remove(),320)},4200)}
+
+/* ═══════════ цикл ═══════════ */
+function afterPrices(){updateTape();renderList();updateHead();drawChart(hoverIdx);
+  updatePreview();renderAccount();renderPortfolio()}
+renderList();updateHead();drawChart();updatePreview();renderAccount();renderPortfolio();renderHistory();
+loadDay(bySym[current]);
+fetchCrypto();
+setInterval(fetchCrypto,20000);
+setInterval(simTick,2500);
+</script>
+</body>
+</html>
