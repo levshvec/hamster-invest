@@ -3,15 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
-<!-- ⭐⭐⭐ ПОДТВЕРЖДЕНИЕ ДЛЯ ПОИСКОВИКОВ ⭐⭐⭐ -->
-<meta name="google-site-verification" content="wfAKD2bME2G7jnW5ZYxjoX367J3DED1isHGSIZp8aAQ" />
-<meta name="yandex-verification" content="9123cb135313e69d" />
-
-<!-- ⭐⭐⭐ ФАВИКОН (иконка на вкладке) ⭐⭐⭐ -->
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐹</text></svg>">
-
 <title>Хомяк-Инвест — симулятор биржи</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐹</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800;900&family=Golos+Text:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -252,4 +245,695 @@ footer{padding:8px 14px 26px}}
 .pct{font-size:11px;padding:8px 0}.gobtn{font-size:14px;padding:14px}.fineprint{font-size:10px}
 .pstats{grid-template-columns:1fr}
 .doc{padding:16px}
-.modal{padding:18px}.mrow{font-size:
+.modal{padding:18px}.mrow{font-size:12px}.mrow.final b{font-size:14px}.mbtns button{padding:12px;font-size:13px}
+#toasts{right:10px;bottom:calc(10px + env(safe-area-inset-bottom));max-width:calc(100vw - 20px)}
+.toast{padding:10px 14px;font-size:12px;max-width:280px}
+#chart{height:240px}.ranges{top:6px;right:10px}.rbtn{padding:6px 10px;font-size:10px}
+.ad-slot{min-height:70px}.ad-rect{min-height:160px}}
+@media(max-width:380px){.brand h1{font-size:13px;letter-spacing:0}.coin{width:38px;height:38px;font-size:20px}.pcts{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="glow g1"></div><div class="glow g2"></div>
+<header>
+  <div class="brand"><div class="coin">🐹</div><div><h1>ХОМЯК<em>·</em>ИНВЕСТ</h1><small>симулятор биржи · реальные котировки · виртуальные деньги</small></div></div>
+  <div class="hspace"></div>
+  <div class="status"><span class="dot" id="stDot"></span><span id="stTxt">Подключение к рынку…</span></div>
+  <button class="ghost-btn" id="resetBtn">⟲ Сбросить счёт</button>
+</header>
+<div class="tape-wrap"><div class="tape" id="tape"></div></div>
+<div class="ad-slot"></div>
+
+<nav class="views">
+  <button class="vbtn on" data-v="terminal">📈 Терминал</button>
+  <button class="vbtn" data-v="portfolio">💼 Портфель</button>
+  <button class="vbtn" data-v="docs">📚 Документы</button>
+</nav>
+
+<div id="viewTerminal">
+<main class="layout">
+  <aside class="panel">
+    <div class="ptitle"><span class="live-dot"></span>Котировки <span id="updTime" style="margin-left:auto;font-family:'JetBrains Mono';letter-spacing:0;text-transform:none;color:var(--faint)"></span></div>
+    <div class="filters">
+      <button class="fbtn on" data-f="all">Все</button>
+      <button class="fbtn" data-f="crypto">Крипто</button>
+      <button class="fbtn" data-f="stock">Акции</button>
+    </div>
+    <div class="alist" id="alist"></div>
+    <div class="listnote">Крипто — live CoinGecko (~20 с). Акции — live Мосбиржа в часы торгов. Без сети — симуляция (СИМ).</div>
+  </aside>
+  <section style="display:flex;flex-direction:column;gap:16px;min-width:0">
+    <div class="panel">
+      <div class="ahead">
+        <div class="aicon" id="hIcon" style="--c:#f7931a">₿</div>
+        <div class="atitle"><h2 id="hName">Биткоин</h2><div class="sub"><span class="mono" id="hSym">BTC</span><span id="hType" class="simbadge" style="color:var(--up);border-color:rgba(47,213,117,.4)">LIVE</span></div></div>
+        <div class="bigprice"><div class="p" id="hPrice">—</div><div class="sub2"><span class="chip up" id="hChg">0,0%</span></div></div>
+      </div>
+      <div class="hilo">
+        <span>Макс. 24ч: <b id="hHigh" class="up">—</b></span><span>Мин. 24ч: <b id="hLow" class="down">—</b></span>
+        <span>Покупка (ask): <b id="hAsk">—</b></span><span>Продажа (bid): <b id="hBid">—</b></span><span>Спред: <b>0,30%</b></span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="chartbox">
+        <div class="ranges"><button class="rbtn" data-r="1h">1Ч</button><button class="rbtn on" data-r="24h">24Ч</button></div>
+        <canvas id="chart"></canvas>
+      </div>
+      <div class="chartlegend"><b class="up">▲</b> покупка · <b class="down">▼</b> продажа · <b style="color:var(--gold)">─ ─</b> средняя цена вашей позиции</div>
+    </div>
+  </section>
+  <aside class="rightcol">
+    <div class="panel acc">
+      <div class="lbl">Итого по счёту</div>
+      <div class="total js-total">100 000 ₽</div>
+      <div class="plrow"><span class="plbadge up js-pl">+0 ₽ · 0,0%</span><span class="rankchip js-rank">🐹 Хомячок-новичок</span></div>
+      <div class="rows">
+        <div class="aro"><span>Свободные средства</span><b class="js-cash">—</b></div>
+        <div class="aro"><span>Стоимость активов</span><b class="js-pos">—</b></div>
+        <div class="aro"><span>Реализованный результат</span><b class="js-real">—</b></div>
+        <div class="aro"><span>Удержано НДФЛ (13%)</span><b class="js-tax">—</b></div>
+        <div class="aro"><span>Комиссии за всё время</span><b class="js-fees">—</b></div>
+      </div>
+    </div>
+    <div class="panel trade">
+      <div class="ptitle" style="padding:0 0 2px">Новый ордер</div>
+      <div class="seg"><button class="sbtn buy on" id="sideBuy">Купить</button><button class="sbtn sell" id="sideSell">Продать</button></div>
+      <div class="posinfo" id="posInfo" style="display:none"></div>
+      <div class="fld"><label><span>Сумма</span><span>₽</span></label><input id="inAmt" inputmode="decimal" placeholder="0,00" autocomplete="off"></div>
+      <div class="fld"><label><span>Количество</span><span id="qtyUnit">BTC</span></label><input id="inQty" inputmode="decimal" placeholder="0" autocomplete="off"></div>
+      <div class="pcts"><button class="pct" data-p="0.25">25%</button><button class="pct" data-p="0.5">50%</button><button class="pct" data-p="0.75">75%</button><button class="pct" data-p="1">MAX</button></div>
+      <div class="pv">
+        <div class="r"><span>Цена исполнения</span><b id="pvPx">—</b></div>
+        <div class="r"><span>Сумма сделки</span><b id="pvAmt">—</b></div>
+        <div class="r"><span>Комиссия брокера (0,3%)</span><b id="pvBrk">—</b></div>
+        <div class="r"><span>Сбор биржи (0,03%)</span><b id="pvEx">—</b></div>
+        <div class="r" id="pvTaxRow" style="display:none"><span>НДФЛ 13% с прибыли</span><b id="pvTax">—</b></div>
+        <div class="r total"><span id="pvTotLbl">К списанию</span><b id="pvTot">—</b></div>
+      </div>
+      <div class="tmsg" id="tMsg"></div>
+      <button class="gobtn buy" id="goBtn" disabled>Купить BTC</button>
+      <div class="fineprint">Ордер исполняется мгновенно по текущей котировке. Тариф «Хомяк Базовый»: 0,3% (мин. 1 ₽) + сбор биржи, спред ±0,15%, НДФЛ 13% с прибыли. Это игра — реальные сделки не совершаются.</div>
+    </div>
+    <div class="panel">
+      <div class="ptitle"><span class="live-dot"></span>Стакан заявок <span id="domSym" class="mono" style="color:var(--gold);letter-spacing:0;margin-left:auto">BTC</span></div>
+      <div class="dom">
+        <div class="dom-head"><span>Цена, ₽</span><span>Объём</span></div>
+        <div id="domAsks"></div>
+        <div class="dom-spread" id="domSpread">спред —</div>
+        <div id="domBids"></div>
+      </div>
+      <div class="dom-note">Синтетический стакан для тренировки чтения рынка. Клик по строке — подставить её объём в ордер.</div>
+    </div>
+    <div class="ad-slot ad-rect"></div>
+  </aside>
+</main>
+<section class="bottom">
+  <div class="panel bpanel">
+    <div class="btabs">
+      <button class="btab on" data-t="hist">📜 История операций</button>
+      <button class="btab" data-t="fees">📋 Тариф и правила</button>
+    </div>
+    <div class="bcontent hist-box" id="tabHist"></div>
+    <div class="bcontent" id="tabFees" style="display:none">
+      <div class="feegrid">
+        <div class="feecard"><b>0,3%</b><span>Комиссия брокера с каждой сделки, минимум 1 ₽ за ордер.</span></div>
+        <div class="feecard"><b>0,03%</b><span>Биржевой сбор — добавляется к комиссии брокера при исполнении.</span></div>
+        <div class="feecard"><b>±0,15%</b><span>Спред: покупка по ask (+0,15%), продажа по bid (−0,15%).</span></div>
+        <div class="feecard"><b>13%</b><span>НДФЛ удерживается автоматически с прибыли при продаже.</span></div>
+        <div class="feecard"><b>0 сек</b><span>Мгновенное исполнение по последней котировке. Акции — целыми лотами.</span></div>
+      </div>
+      <div class="warnbox">⚠️ Это игра. Баланс, ордера и прибыль — виртуальные. Приложение ничего не покупает и не отправляет заявки на биржу. Котировки: крипто — CoinGecko, акции — Мосбиржа (возможны задержки).</div>
+    </div>
+  </div>
+</section>
+</div>
+
+<section id="viewPortfolio" style="display:none">
+  <div class="pwrap">
+    <div class="pstats">
+      <div class="panel pstat"><div class="lbl">Итого по счёту</div><div class="total js-total">—</div><span class="plbadge up js-pl">—</span></div>
+      <div class="panel pstat"><div class="lbl">Ваш ранг</div><div class="rankbig js-rank">—</div><div class="sub">растёт вместе с прибылью</div></div>
+      <div class="panel pstat"><div class="lbl">Свободные средства</div><div class="big2 js-cash">—</div><div class="sub">в активах: <b class="mono js-pos">—</b></div></div>
+      <div class="panel pstat"><div class="lbl">Комиссии за всё время</div><div class="big2 down js-fees">—</div><div class="sub">НДФЛ: <b class="mono js-tax">—</b> · реализовано: <b class="mono js-real">—</b></div></div>
+    </div>
+    <div class="panel"><div class="ptitle">💼 Позиции</div><div class="bcontent port-box"></div></div>
+    <div class="panel"><div class="ptitle">📜 История операций</div><div class="bcontent hist-box"></div></div>
+  </div>
+</section>
+
+<section id="viewDocs" style="display:none">
+  <div class="docs">
+    <div class="dnav">
+      <button class="dbtn on" data-d="about">ℹ️ О проекте</button>
+      <button class="dbtn" data-d="rules">📖 Правила игры</button>
+      <button class="dbtn" data-d="privacy">🔒 Политика конфиденциальности</button>
+      <button class="dbtn" data-d="terms">📄 Пользовательское соглашение</button>
+    </div>
+    <div style="min-width:0">
+      <div class="panel doc" id="doc-about">
+        <h3>О проекте</h3><div class="date">«Хомяк-Инвест» · симулятор биржи</div>
+        <p>«Хомяк-Инвест» — бесплатный игровой симулятор биржи, в котором можно разобраться, как устроены торги, не рискуя настоящими деньгами. На старте вы получаете 100 000 виртуальных рублей и торгуете по реальным котировкам.</p>
+        <h4>Что внутри</h4>
+        <ul>
+          <li>Реальные котировки криптовалют в рублях (Bitcoin, Ethereum, TON, Solana, XRP, Dogecoin) — публичный API CoinGecko, обновление примерно раз в 20 секунд;</li>
+          <li>Акции Мосбиржи (Сбер, Яндекс, Лукойл, Газпром, Озон, ВТБ) — реальные котировки ISS MOEX в рублях в часы торгов; ночью и в выходные цена держится на последнем закрытии;</li>
+          <li>Комиссии как у настоящего брокера: 0,3% (мин. 1 ₽) + сбор биржи 0,03%, спред ±0,15%, НДФЛ 13% с прибыли при продаже;</li>
+          <li>Живой график с отметками ваших сделок, стакан заявок, портфель, история операций и ранги игрока — от «Хомячка-новичка» до «Легенды биржи»;</li>
+          <li>Если связи с API нет, активы честно переходят в симуляцию (метка СИМ). Прогресс сохраняется в вашем браузере и никуда не отправляется.</li>
+        </ul>
+        <h4>Главное</h4>
+        <p>Приложение не является брокером: реальные сделки не совершаются, ордера никуда не отправляются. Проект создан для развлечения и обучения.</p>
+      </div>
+      <div class="panel doc" id="doc-rules" style="display:none">
+        <h3>Правила игры</h3><div class="date">Как пользоваться симулятором</div>
+        <ol>
+          <li>На старте на счёте <b>100 000 виртуальных ₽</b>.</li>
+          <li>Выберите актив в списке «Котировки»: крипто — данные CoinGecko, акции — данные Мосбиржи (в часы торгов). Если связи нет, активы работают в симуляции (метка СИМ).</li>
+          <li>Покупка: введите сумму или количество либо нажмите 25% / 50% / 75% / MAX — окно подтверждения откроется сразу. Нажмите «Подтвердить», и актив появится в портфеле.</li>
+          <li>Продажа: переключитесь на «Продать», укажите долю позиции и подтвердите. С прибыли автоматически удерживается НДФЛ 13%.</li>
+          <li>За каждую сделку списывается комиссия брокера 0,3% (мин. 1 ₽) + сбор биржи 0,03%; покупка идёт по цене ask (+0,15%), продажа — по bid (−0,15%).</li>
+          <li>Ваши покупки и продажи отмечаются прямо на графике: ▲ — покупка, ▼ — продажа, золотой пунктир — средняя цена позиции.</li>
+          <li>Вкладка «Портфель» — сводка счёта, позиции и история операций. «Стакан заявок» помогает почувствовать рынок: клик по строке подставляет её объём в ордер.</li>
+          <li>Кнопка «⟲ Сбросить счёт» начинает игру заново.</li>
+        </ol>
+        <h4>Ранги</h4>
+        <p>−20% и ниже — «Хомяк в панике», минус — «Грустный хомяк», 0–5% — «Хомячок-новичок», 5–15% — «Матёрый хомяк», 15–40% — «Волк с Тверской», 40%+ — «Легенда биржи».</p>
+        <h4>Советы</h4>
+        <p>Не ставьте всё на один актив, держите свободные средства и помните: частые сделки съедают прибыль комиссиями.</p>
+      </div>
+      <div class="panel doc" id="doc-privacy" style="display:none">
+        <h3>Политика конфиденциальности</h3><div class="date">Дата обновления: 17 августа 2026 г.</div>
+        <h4>1. Общие положения</h4>
+        <p>«Хомяк-Инвест» — игровой симулятор. Приложение не требует регистрации и не собирает персональные данные пользователей.</p>
+        <h4>2. Локальные данные</h4>
+        <p>Игровой прогресс (баланс, портфель, история операций) хранится только на вашем устройстве в localStorage браузера и не передаётся на серверы. Удалить данные можно кнопкой «Сбросить счёт» или очисткой данных сайта в браузере.</p>
+        <h4>3. Сторонние сервисы</h4>
+        <p>Для отображения котировок приложение обращается к публичным API CoinGecko (криптовалюты) и Мосбиржи ISS MOEX (акции). При запросах ваш IP-адрес и стандартные HTTP-заголовки передаются этим сервисам; обработка регулируется их политиками конфиденциальности.</p>
+        <h4>4. Cookies и аналитика</h4>
+        <p>Приложение не использует cookies и трекеры. Если на сайте подключаются рекламные сети, они могут обрабатывать данные согласно собственным политикам.</p>
+        <h4>5. Изменения</h4>
+        <p>Политика может обновляться. Новая редакция действует с момента публикации на этой странице.</p>
+        <h4>6. Контакты</h4>
+        <p>По вопросам, связанным с политикой, обращайтесь к владельцу сайта.</p>
+      </div>
+      <div class="panel doc" id="doc-terms" style="display:none">
+        <h3>Пользовательское соглашение</h3><div class="date">Дата обновления: 17 августа 2026 г.</div>
+        <h4>1. Предмет</h4>
+        <p>Приложение «Хомяк-Инвест» предоставляется бесплатно в развлекательных и обучающих целях и является симулятором биржевой торговли.</p>
+        <h4>2. Статус средств и операций</h4>
+        <p>Все средства, активы и операции внутри приложения — виртуальные. Приложение не является брокером, биржей или инвестиционным советником, не совершает реальных сделок и не даёт инвестиционных рекомендаций.</p>
+        <h4>3. Котировки</h4>
+        <p>Котировки криптовалют предоставляются сервисом CoinGecko, акции — Мосбиржей (ISS MOEX); данные могут быть задержаны, а вне торговых часов акции остаются на цене последнего закрытия. При отсутствии подключения цены симулируются. Точность, полнота и непрерывность данных не гарантируются.</p>
+        <h4>4. Обязанности пользователя</h4>
+        <p>Пользователь обязуется использовать приложение законными способами и не вмешиваться в его работу. Игровые результаты не имеют юридической силы и не создают денежных обязательств.</p>
+        <h4>5. Ограничение ответственности</h4>
+        <p>Приложение предоставляется «как есть». Владелец не отвечает за убытки, упущенную выгоду и любые последствия использования приложения, включая потерю прогресса при очистке данных браузера.</p>
+        <h4>6. Изменение условий</h4>
+        <p>Владелец вправе изменять приложение и настоящее соглашение без предварительного уведомления. Продолжение использования означает согласие с новыми условиями.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="ad-slot ad-bottom"></div>
+<footer>Хомяк-Инвест · симулятор инвестиций · данные о криптовалютах: api.coingecko.com (RUB) · акции: iss.moex.com · не является инвестиционной рекомендацией 🐹<span class="love">Люблю свою девушку Любу 😘</span></footer>
+
+<div class="overlay" id="ovl">
+  <div class="modal">
+    <h3 id="mTitle">Подтверждение ордера</h3>
+    <div id="mRows"></div>
+    <div class="mbtns"><button class="mcancel" id="mCancel">Отмена</button><button class="mok buy" id="mOk">Подтвердить</button></div>
+  </div>
+</div>
+<div id="toasts"></div>
+
+<script>
+'use strict';
+const START=100000,BRK=0.003,BRK_MIN=1,EXCH=0.0003,ASK_K=1.0015,BID_K=0.9985,TAX=0.13,LS='homyak-invest-v1';
+const CRYPTO=[
+ {sym:'BTC',name:'Биткоин',id:'bitcoin',icon:'₿',color:'#f7931a',base:9400000},
+ {sym:'ETH',name:'Эфириум',id:'ethereum',icon:'Ξ',color:'#8ba2fb',base:310000},
+ {sym:'TON',name:'Toncoin',id:'the-open-network',icon:'T',color:'#4cc9f0',base:420},
+ {sym:'SOL',name:'Солана',id:'solana',icon:'S',color:'#b888f8',base:14500},
+ {sym:'XRP',name:'Рипл',id:'ripple',icon:'X',color:'#9aa7ff',base:210},
+ {sym:'DOGE',name:'Догикоин',id:'dogecoin',icon:'Ð',color:'#e6c455',base:17.5}];
+const STOCKS=[
+ {sym:'SBER',name:'Сбербанк',icon:'С',color:'#3ecf8e',base:305.4,vol:.0009},
+ {sym:'YDEX',name:'Яндекс',icon:'Я',color:'#ff5d6c',base:4362,vol:.0012},
+ {sym:'LKOH',name:'Лукойл',icon:'Л',color:'#ffb648',base:6418,vol:.0008},
+ {sym:'GAZP',name:'Газпром',icon:'Г',color:'#6ea8ff',base:128.6,vol:.0010},
+ {sym:'OZON',name:'Озон',icon:'O',color:'#4c7dff',base:3120,vol:.0014},
+ {sym:'VTBR',name:'ВТБ',icon:'В',color:'#38b6ff',base:96.4,vol:.0011}];
+const ASSETS=[...CRYPTO.map(c=>({...c,type:'crypto'})),...STOCKS.map(s=>({...s,type:'stock',sim:false}))];
+const bySym=Object.fromEntries(ASSETS.map(a=>[a.sym,a]));
+const MKT={};ASSETS.forEach(a=>MKT[a.sym]={p:a.base,ch:0,day:[],dir:0});
+let state,current='BTC',side='buy',range='24h',filter='all',SRC_C=null,SRC_S=null,lastQuote=null,chartCache=[],hoverIdx=null;
+function defState(){return{cash:START,hold:{},ops:[],fees:0,tax:0,realized:0}}
+try{state=Object.assign(defState(),JSON.parse(localStorage.getItem(LS)||'{}'))}catch(e){state=defState()}
+function save(){localStorage.setItem(LS,JSON.stringify(state))}
+const fmtM=n=>n.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
+function fmtP(p){const d=p>=100000?0:p>=1?2:p>=0.01?4:6;return p.toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function fmtQ(q,sym){return bySym[sym].type==='stock'?Math.round(q).toLocaleString('ru-RU'):(+q.toFixed(8)).toString()}
+const fmtPct=v=>(v>=0?'+':'')+v.toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+const tShort=t=>new Date(t).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+const parseN=s=>parseFloat(String(s).replace(/[\s\u00A0]/g,'').replace(',','.'));
+function rank(p){if(p<=-20)return'🐹💸 Хомяк в панике';if(p<0)return'🐹📉 Грустный хомяк';if(p<5)return'🐹 Хомячок-новичок';
+ if(p<15)return'🐹📈 Матёрый хомяк';if(p<40)return'🐺 Волк с Тверской';return'👑 Легенда биржи'}
+/* симуляция (запасной режим) */
+function seedSim(a){const n=288,arr=[a.base*(1+(Math.random()-.5)*.04)];
+ for(let i=1;i<n;i++)arr.push(arr[i-1]*(1+(Math.random()-.497)*(a.vol||.0012)*6));
+ const nw=Date.now();MKT[a.sym].day=arr.map((p,i)=>({t:nw-(n-1-i)*5*60e3,p}));
+ MKT[a.sym].p=arr[n-1];MKT[a.sym].ch=(arr[n-1]/arr[0]-1)*100;MKT[a.sym].dir=0}
+function simTick(){const nw=Date.now();
+ ASSETS.forEach(a=>{if(!a.sim)return;const m=MKT[a.sym];
+  m.p*=Math.exp((Math.random()+Math.random()+Math.random()-1.5)*(a.vol||.0012)*1.9);
+  m.day.push({t:nw,p:m.p});if(m.day.length>1500)m.day.shift();
+  m.ch=(m.p/m.day[0].p-1)*100;m.dir=0});
+ afterPrices()}
+/* статус */
+function updateStatus(){const d=document.getElementById('stDot'),t=document.getElementById('stTxt');
+ if(SRC_C===null||SRC_S===null){t.textContent='Подключение к рынку…';return}
+ const ok=SRC_C==='live'&&SRC_S==='live';
+ d.classList.toggle('off',!ok);
+ t.textContent=ok?'LIVE · CoinGecko + Мосбиржа':
+  (SRC_C==='live'?'LIVE крипто · акции в симуляции':
+  (SRC_S==='live'?'Крипто в симуляции · LIVE акции':'СИМУЛЯЦИЯ · оффлайн-режим'))}
+/* живая крипта — CoinGecko */
+async function fetchCrypto(){
+ if(SRC_C==='sim'){updateStatus();return}
+ try{
+  const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids='+CRYPTO.map(c=>c.id).join(',')+'&vs_currencies=rub&include_24hr_change=true');
+  if(!r.ok)throw 0;const j=await r.json();
+  SRC_C='live';
+  CRYPTO.forEach(c=>{const d=j[c.id];if(!d||!d.rub)return;const m=MKT[c.sym],old=m.p;
+   m.p=d.rub;m.ch=d.rub_24h_change||0;m.dir=old?Math.sign(d.rub-old):0;
+   const last=m.day[m.day.length-1];
+   if(!last||now()-last.t>15e3)m.day.push({t:now(),p:d.rub});
+   if(m.day.length>1400)m.day.shift()});
+  document.getElementById('updTime').textContent=new Date().toLocaleTimeString('ru-RU');
+  updateStatus();afterPrices();
+ }catch(e){
+  if(SRC_C===null){SRC_C='sim';
+   CRYPTO.forEach(c=>{bySym[c.sym].sim=true;seedSim(bySym[c.sym])});
+   toast('📡 CoinGecko недоступен — крипто работает в симуляции','info')}
+  updateStatus()}}
+/* живые акции — Мосбиржа ISS MOEX */
+async function fetchStocks(){
+ if(SRC_S==='sim'){updateStatus();return}
+ try{
+  const r=await fetch('https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.json?iss.meta=off&iss.only=securities&securities.columns=SECID,LAST,PREVPRICE');
+  if(!r.ok)throw 0;const j=await r.json();
+  if(!j.securities||!j.securities.data)throw 0;
+  const rows=j.securities.data;
+  if(SRC_S===null){STOCKS.forEach(s=>{MKT[s.sym].day=[];MKT[s.sym].loadedDay=false})}
+  SRC_S='live';
+  STOCKS.forEach(s=>{
+   const row=rows.find(x=>x[0]===s.sym);if(!row)return;
+   const last=row[1],prev=row[2];
+   if(typeof last!=='number'||last<=0)return;
+   bySym[s.sym].sim=false;
+   const m=MKT[s.sym],old=m.p;
+   m.p=last;
+   if(typeof prev==='number'&&prev>0)m.prev=prev;
+   m.ch=(typeof prev==='number'&&prev>0)?(last/prev-1)*100:0;
+   m.dir=old?Math.sign(last-old):0;
+   const lp=m.day[m.day.length-1];
+   if(!lp||Math.abs(lp.p-last)>1e-9||now()-lp.t>60e3)m.day.push({t:now(),p:last});
+   if(m.day.length>1400)m.day.shift()});
+  updateStatus();afterPrices();
+ }catch(e){
+  if(SRC_S===null){SRC_S='sim';
+   STOCKS.forEach(s=>{bySym[s.sym].sim=true;seedSim(bySym[s.sym])});
+   toast('📡 Мосбиржа недоступна — акции работают в симуляции','info')}
+  updateStatus()}}
+const now=()=>Date.now();
+/* резервная история графика: привязана к реальной текущей цене */
+function fallbackDay(a){
+ const m=MKT[a.sym];if(!m||!m.p||m.loadedDay||m.day.length>2)return;
+ const p=m.p;
+ let startP=a.type==='stock'?(typeof m.prev==='number'&&m.prev>0?m.prev:p):p/(1+(m.ch||0)/100);
+ if(!isFinite(startP)||startP<=0)startP=p;
+ const n=144,nw=Date.now(),pts=[];
+ for(let i=0;i<n;i++){
+  const t=nw-(n-1-i)*10*60e3;
+  const base=startP+(p-startP)*i/(n-1);
+  const noise=i===n-1?0:(Math.random()-.5)*0.004*base;
+  pts.push({t,p:Math.max(base+noise,1e-6)})}
+ m.day=pts;
+ updateHead();drawChart()}
+/* график за день: крипта — CoinGecko, акции — свечи Мосбиржи; при неудаче — резерв */
+async function loadDay(a){
+ const m=MKT[a.sym];
+ if(a.sim||m.loadedDay)return;
+ try{
+  if(a.type==='crypto'){
+   const r=await fetch(`https://api.coingecko.com/api/v3/coins/${a.id}/market_chart?vs_currency=rub&days=1`);
+   const j=await r.json();
+   if(j.prices&&j.prices.length>1){m.day=j.prices.map(([t,p])=>({t,p}));m.loadedDay=true;updateHead();drawChart();return}
+  }else{
+   const from=new Date(Date.now()-4*864e5).toISOString().slice(0,10);
+   const r=await fetch(`https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities/${a.sym}/candles.json?iss.meta=off&interval=10&from=${from}&candles.columns=close,end`);
+   const j=await r.json();
+   if(j.candles&&j.candles.data&&j.candles.data.length>1){
+    m.day=j.candles.data.map(row=>({t:new Date(String(row[1]).replace(' ','T')).getTime(),p:row[0]}))
+     .filter(d=>typeof d.p==='number'&&d.p>0);
+    if(m.day.length>1){m.loadedDay=true;updateHead();drawChart();return}}
+  }
+ }catch(e){}
+ fallbackDay(a)}
+/* бегущая строка */
+const tapeRefs=[];
+(function(){const tape=document.getElementById('tape');
+ for(let cp=0;cp<2;cp++)ASSETS.forEach(a=>{const s=document.createElement('span');s.className='titem';
+  s.innerHTML=`<b>${a.sym}</b><span class="tp"></span><span class="tc"></span>`;
+  tape.appendChild(s);tapeRefs.push({sym:a.sym,p:s.children[1],c:s.children[2]})})})();
+function updateTape(){tapeRefs.forEach(r=>{const m=MKT[r.sym];if(!m||!m.p)return;
+ r.p.textContent=fmtP(m.p)+' ₽';r.c.textContent=fmtPct(m.ch);r.c.className='tc '+(m.ch>=0?'up':'down')})}
+/* список активов */
+document.querySelectorAll('.fbtn').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('on'));
+ b.classList.add('on');filter=b.dataset.f;renderList()});
+function renderList(){
+ const box=document.getElementById('alist');box.innerHTML='';
+ ASSETS.filter(a=>filter==='all'||a.type===filter).forEach(a=>{
+  const m=MKT[a.sym],up=m.ch>=0;
+  const row=document.createElement('div');
+  row.className='arow'+(a.sym===current?' sel':'')+(m.dir>0?' flash-up':m.dir<0?' flash-dn':'');
+  row.innerHTML=`<div class="aicon" style="--c:${a.color}">${a.icon}</div>
+   <div class="ainfo"><b>${a.sym}${a.sim?' <span class="simbadge">СИМ</span>':''}</b><span>${a.name}</span></div>
+   <canvas class="spark" width="140" height="36"></canvas>
+   <div class="aprice"><b>${fmtP(m.p)} ₽</b><span class="chip ${up?'up':'down'}">${fmtPct(m.ch)}</span></div>`;
+  row.onclick=()=>selectAsset(a.sym);
+  box.appendChild(row);
+  drawSpark(row.querySelector('.spark'),m.day.slice(-60),up)})}
+function drawSpark(cv,data,up){if(!cv||data.length<2)return;const c=cv.getContext('2d');
+ c.clearRect(0,0,140,36);let mn=1/0,mx=-1/0;data.forEach(d=>{mn=Math.min(mn,d.p);mx=Math.max(mx,d.p)});
+ if(mx===mn)mx+=1;const X=i=>2+136*i/(data.length-1),Y=p=>3+30*(1-(p-mn)/(mx-mn));
+ c.beginPath();data.forEach((d,i)=>i?c.lineTo(X(i),Y(d.p)):c.moveTo(X(i),Y(d.p)));
+ c.strokeStyle=up?'#2fd575':'#ff5d6c';c.lineWidth=1.6;c.stroke()}
+/* заголовок актива */
+function selectAsset(sym){current=sym;hoverIdx=null;
+ document.getElementById('inAmt').value='';document.getElementById('inQty').value='';
+ updateHead();drawChart();updatePreview();renderList();renderDOM();loadDay(bySym[sym])}
+function updateHead(){const a=bySym[current],m=MKT[current];
+ const ic=document.getElementById('hIcon');ic.textContent=a.icon;ic.style.setProperty('--c',a.color);
+ document.getElementById('hName').textContent=a.name;
+ document.getElementById('hSym').textContent=a.sym+(a.type==='stock'?' · MOEX':' / RUB');
+ const tp=document.getElementById('hType');
+ if(a.sim){tp.textContent=a.type==='stock'?'СИМУЛЯЦИЯ':'СИМУЛЯЦИЯ (оффлайн)';tp.style.cssText='color:var(--cyan);border-color:rgba(76,201,240,.4)'}
+ else{tp.textContent='LIVE';tp.style.cssText='color:var(--up);border-color:rgba(47,213,117,.4)'}
+ const pe=document.getElementById('hPrice');pe.textContent=fmtP(m.p)+' ₽';
+ pe.classList.remove('fu','fd');if(m.dir>0)pe.classList.add('fu');if(m.dir<0)pe.classList.add('fd');
+ const ch=document.getElementById('hChg');ch.textContent=fmtPct(m.ch);ch.className='chip '+(m.ch>=0?'up':'down');
+ const day=m.day||[];
+ if(day.length>1){let hi=-1/0,lo=1/0;day.forEach(d=>{hi=Math.max(hi,d.p);lo=Math.min(lo,d.p)});
+  document.getElementById('hHigh').textContent=fmtP(hi)+' ₽';
+  document.getElementById('hLow').textContent=fmtP(lo)+' ₽'}
+ document.getElementById('hAsk').textContent=fmtP(m.p*ASK_K)+' ₽';
+ document.getElementById('hBid').textContent=fmtP(m.p*BID_K)+' ₽';
+ document.getElementById('qtyUnit').textContent=a.sym}
+/* график */
+const PADL=10,PADR=68,PADT=14,PADB=22;
+document.querySelectorAll('.rbtn').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.rbtn').forEach(x=>x.classList.remove('on'));
+ b.classList.add('on');range=b.dataset.r;drawChart()});
+function chartData(){let d=(MKT[current].day||[]).slice();
+ if(range==='1h'){const cut=Date.now()-3600e3;d=d.filter(x=>x.t>=cut)}return d}
+function drawChart(hi){
+ const cv=document.getElementById('chart'),ctx=cv.getContext('2d');
+ const w=cv.clientWidth,h=cv.clientHeight,dpr=devicePixelRatio||1;
+ if(cv.width!==Math.round(w*dpr)){cv.width=w*dpr;cv.height=h*dpr}
+ ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+ let data=chartData(),synthNote=false;
+ if(data.length<2){const m=MKT[current];
+  if(!m||!m.p){ctx.fillStyle='#5b6b8c';ctx.font='13px "Golos Text"';ctx.textAlign='center';
+   ctx.fillText('Нет данных',w/2,h/2);return}
+  data=[{t:Date.now()-3600e3,p:m.p},{t:Date.now(),p:m.p}];synthNote=true}
+ chartCache=data;
+ let mn=1/0,mx=-1/0;data.forEach(d=>{mn=Math.min(mn,d.p);mx=Math.max(mx,d.p)});
+ if(mx===mn){mx*=1.001;mn*=.999}
+ const pad=(mx-mn)*.08;mn-=pad;mx+=pad;
+ const X=i=>PADL+(w-PADL-PADR)*i/(data.length-1),Y=p=>PADT+(h-PADT-PADB)*(1-(p-mn)/(mx-mn));
+ const up=data[data.length-1].p>=data[0].p,col=up?'#2fd575':'#ff5d6c';
+ ctx.strokeStyle='rgba(148,163,184,.1)';ctx.fillStyle='#5b6b8c';ctx.font='11px "JetBrains Mono"';ctx.textAlign='left';
+ for(let g=0;g<=4;g++){const p=mn+(mx-mn)*g/4,y=Y(p);
+  ctx.beginPath();ctx.moveTo(PADL,y);ctx.lineTo(w-PADR,y);ctx.stroke();
+  ctx.fillText(p.toLocaleString('ru-RU',{maximumFractionDigits:p<10?2:0}),w-PADR+6,y+4)}
+ const grad=ctx.createLinearGradient(0,PADT,0,h-PADB);
+ grad.addColorStop(0,up?'rgba(47,213,117,.26)':'rgba(255,93,108,.26)');grad.addColorStop(1,'rgba(0,0,0,0)');
+ ctx.beginPath();ctx.moveTo(X(0),Y(data[0].p));data.forEach((d,i)=>ctx.lineTo(X(i),Y(d.p)));
+ ctx.lineTo(X(data.length-1),h-PADB);ctx.lineTo(X(0),h-PADB);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+ ctx.beginPath();data.forEach((d,i)=>i?ctx.lineTo(X(i),Y(d.p)):ctx.moveTo(X(i),Y(d.p)));
+ ctx.strokeStyle=col;ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
+ const hh=state.hold[current];
+ if(hh&&hh.qty>1e-9){const avg=hh.invested/hh.qty;
+  if(avg>=mn&&avg<=mx){const y=Y(avg);
+   ctx.setLineDash([6,4]);ctx.strokeStyle='rgba(255,182,72,.85)';ctx.lineWidth=1.2;
+   ctx.beginPath();ctx.moveTo(PADL,y);ctx.lineTo(w-PADR,y);ctx.stroke();ctx.setLineDash([]);
+   ctx.fillStyle='#ffb648';ctx.font='700 10px "JetBrains Mono"';ctx.textAlign='left';
+   ctx.fillText('ср. '+fmtP(avg),PADL+4,y-5)}}
+ const t0=data[0].t,t1=data[data.length-1].t;
+ state.ops.forEach(o=>{if(o.sym!==current||o.t<t0||o.t>t1)return;
+  let lo=0,hi2=data.length-1;
+  while(hi2-lo>1){const md=(lo+hi2)>>1;(data[md].t<o.t)?lo=md:hi2=md}
+  const i=(o.t-data[lo].t<data[hi2].t-o.t)?lo:hi2;
+  const x=X(i),py=Y(Math.min(Math.max(o.px,mn),mx)),isB=o.side==='buy';
+  ctx.beginPath();
+  if(isB){ctx.moveTo(x,py+7);ctx.lineTo(x-6,py+17);ctx.lineTo(x+6,py+17)}
+  else{ctx.moveTo(x,py-7);ctx.lineTo(x-6,py-17);ctx.lineTo(x+6,py-17)}
+  ctx.closePath();ctx.fillStyle=isB?'#2fd575':'#ff5d6c';ctx.fill();
+  ctx.strokeStyle='rgba(10,15,30,.85)';ctx.lineWidth=1.5;ctx.stroke()});
+ ctx.beginPath();ctx.arc(X(data.length-1),Y(data[data.length-1].p),3.5,0,7);ctx.fillStyle=col;ctx.fill();
+ ctx.fillStyle='#5b6b8c';ctx.textAlign='center';
+ ctx.fillText(tShort(data[0].t),PADL+28,h-6);ctx.fillText(tShort(data[data.length-1].t),w-PADR-28,h-6);
+ if(synthNote){ctx.fillStyle='#8fa0bd';ctx.font='11px "Golos Text"';ctx.textAlign='left';
+  ctx.fillText('История подгружается…',PADL+4,PADT+10)}
+ if(hi!=null&&data[hi]){const x=X(hi),y=Y(data[hi].p);
+  ctx.setLineDash([4,4]);ctx.strokeStyle='rgba(232,237,247,.35)';
+  ctx.beginPath();ctx.moveTo(x,PADT);ctx.lineTo(x,h-PADB);ctx.stroke();ctx.setLineDash([]);
+  ctx.beginPath();ctx.arc(x,y,4.5,0,7);ctx.fillStyle='#fff';ctx.fill();
+  ctx.beginPath();ctx.arc(x,y,3,0,7);ctx.fillStyle=col;ctx.fill();
+  const txt=fmtP(data[hi].p)+' ₽ · '+tShort(data[hi].t);ctx.font='700 11px "JetBrains Mono"';
+  const tw=ctx.measureText(txt).width+16,tx=Math.min(Math.max(x-tw/2,PADL),w-PADR-tw);
+  ctx.fillStyle='#152040';ctx.strokeStyle='rgba(148,163,184,.3)';
+  ctx.beginPath();ctx.roundRect(tx,PADT,tw,22,6);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#e8edf7';ctx.textAlign='left';ctx.fillText(txt,tx+8,PADT+15)}}
+const cvEl=document.getElementById('chart');
+cvEl.addEventListener('pointermove',e=>{const r=cvEl.getBoundingClientRect(),data=chartCache;
+ if(data.length<2)return;const x=e.clientX-r.left;
+ let i=Math.round((x-PADL)/(r.width-PADL-PADR)*(data.length-1));
+ i=Math.max(0,Math.min(data.length-1,i));hoverIdx=i;drawChart(i)});
+cvEl.addEventListener('pointerleave',()=>{hoverIdx=null;drawChart()});
+window.addEventListener('resize',()=>drawChart(hoverIdx));
+/* стакан */
+const DOM_LEVELS=8;
+function genDOM(sym){
+ const m=MKT[sym];if(!m||!m.p)return;
+ const step=Math.max(m.p*0.0004,m.p<1?0.000001:0.01);
+ const liq={BTC:4,ETH:3.2,TON:1.2,SOL:1.5,XRP:1,DOGE:.7,SBER:2.2,YDEX:1.6,LKOH:1,GAZP:1.3,OZON:.9,VTBR:1.7}[sym]||1;
+ const prev=m.dom||{a:[],b:[]};
+ const ask=m.p*ASK_K,bid=m.p*BID_K,asks=[],bids=[];
+ for(let i=0;i<DOM_LEVELS;i++){
+  const av=(prev.a[i]||0)*.55+(0.4+Math.random()*1.8)*liq*.45;
+  const bv=(prev.b[i]||0)*.55+(0.4+Math.random()*1.8)*liq*.45;
+  asks.push({p:ask+step*i,v:av});bids.push({p:bid-step*i,v:bv})}
+ let ca=0,cb=0;
+ asks.forEach(l=>{ca+=l.v;l.cum=ca});bids.forEach(l=>{cb+=l.v;l.cum=cb});
+ m.dom={asks,bids,a:asks.map(l=>l.v),b:bids.map(l=>l.v)}}
+function domRow(l,cls,maxC,sym){
+ const d=document.createElement('div');d.className='dom-row '+cls;
+ const qty=l.v*1e6/l.p;
+ d.innerHTML=`<span class="depth" style="width:${Math.min(100,l.cum/maxC*100)}%"></span><span class="dp">${fmtP(l.p)}</span><span class="dv">${fmtQ(qty,sym)}</span>`;
+ d.onclick=()=>{qtyEl.value=fmtQ(qty,sym);sync('qty');toast(`📋 Объём ${fmtQ(qty,sym)} ${sym} подставлен в ордер`,'info')};
+ return d}
+function renderDOM(){
+ genDOM(current);const m=MKT[current];if(!m||!m.dom)return;
+ document.getElementById('domSym').textContent=current;
+ const maxC=Math.max(m.dom.asks[DOM_LEVELS-1].cum,m.dom.bids[DOM_LEVELS-1].cum);
+ const aB=document.getElementById('domAsks'),bB=document.getElementById('domBids');
+ aB.innerHTML='';bB.innerHTML='';
+ [...m.dom.asks].reverse().forEach(l=>aB.appendChild(domRow(l,'ask',maxC,current)));
+ m.dom.bids.forEach(l=>bB.appendChild(domRow(l,'bid',maxC,current)));
+ const spr=m.p*(ASK_K-BID_K);
+ document.getElementById('domSpread').textContent=`спред ${fmtP(spr)} ₽ (${((ASK_K/BID_K-1)*100).toFixed(2)}%)`}
+/* торговля */
+const amtEl=document.getElementById('inAmt'),qtyEl=document.getElementById('inQty');
+document.getElementById('sideBuy').onclick=()=>setSide('buy');
+document.getElementById('sideSell').onclick=()=>setSide('sell');
+function setSide(s){side=s;
+ document.getElementById('sideBuy').classList.toggle('on',s==='buy');
+ document.getElementById('sideSell').classList.toggle('on',s==='sell');updatePreview()}
+amtEl.addEventListener('input',()=>sync('amt'));
+qtyEl.addEventListener('input',()=>sync('qty'));
+function execPx(){const m=MKT[current];if(!m||!m.p)return null;return side==='buy'?m.p*ASK_K:m.p*BID_K}
+function sync(src){const px=execPx();if(!px)return;const a=bySym[current];
+ if(src==='amt'){let v=parseN(amtEl.value);
+  if(!isFinite(v)||v<=0){qtyEl.value='';updatePreview();return}
+  let q=v/px;
+  if(a.type==='stock'){q=Math.floor(q);if(q>0)amtEl.value=fmtM(q*px)}
+  qtyEl.value=q>0?fmtQ(q,current):''}
+ else{let q=parseN(qtyEl.value);
+  if(!isFinite(q)||q<=0){amtEl.value='';updatePreview();return}
+  amtEl.value=fmtM(q*px)}
+ updatePreview()}
+document.querySelectorAll('.pct').forEach(b=>b.onclick=()=>{
+ const p=+b.dataset.p;
+ if(side==='buy'){const amt=Math.floor(state.cash*p/(1+BRK+EXCH+0.0001)*100)/100;
+  amtEl.value=amt>0?fmtM(amt):'';sync('amt')}
+ else{const h=state.hold[current];if(!h)return;
+  let q=h.qty*p;if(bySym[current].type==='stock')q=Math.floor(q);
+  qtyEl.value=q>0?fmtQ(q,current):'';sync('qty')}
+ if(lastQuote)openConfirm()});
+function computeQuote(){
+ const a=bySym[current],m=MKT[current];if(!m||!m.p)return null;
+ const px=execPx();let qty=parseN(qtyEl.value),amount=parseN(amtEl.value);
+ if(!isFinite(qty)||qty<=0){if(isFinite(amount)&&amount>0)qty=amount/px;else qty=0;
+  if(a.type==='stock')qty=Math.floor(qty)}
+ amount=qty*px;
+ const broker=Math.max(BRK_MIN,amount*BRK),exch=amount*EXCH,fees=broker+exch;
+ const q={side,sym:current,qty,px,amount,broker,exch,fees};
+ if(side==='buy'){q.total=amount+fees}
+ else{const h=state.hold[current];q.avg=h?h.invested/h.qty:0;
+  const profit=amount-fees-q.avg*qty;q.tax=profit>0?profit*TAX:0;q.net=amount-fees-q.tax}
+ return q}
+function updatePreview(){
+ const h=state.hold[current],pi=document.getElementById('posInfo');
+ if(h&&h.qty>1e-9){pi.style.display='block';
+  pi.innerHTML=`В портфеле: <b class="mono">${fmtQ(h.qty,current)} ${current}</b> · ср. цена <b class="mono">${fmtP(h.invested/h.qty)} ₽</b>`}
+ else pi.style.display='none';
+ const q=computeQuote();lastQuote=null;
+ const set=(id,v)=>document.getElementById(id).textContent=v;
+ set('pvPx',q?fmtP(q.px)+' ₽':'—');set('pvAmt',q&&q.amount?fmtM(q.amount)+' ₽':'—');
+ set('pvBrk',q&&q.amount?fmtM(q.broker)+' ₽':'—');set('pvEx',q&&q.amount?fmtM(q.exch)+' ₽':'—');
+ const taxRow=document.getElementById('pvTaxRow');
+ let msg='',ok=false;
+ if(!q||q.qty<=0||q.amount<1){msg='Введите сумму (мин. 10 ₽) или количество'}
+ else{
+  taxRow.style.display=side==='sell'?'flex':'none';
+  if(side==='sell')set('pvTax',q.tax>0?'−'+fmtM(q.tax)+' ₽':'0 ₽ (нет прибыли)');
+  set('pvTot',side==='buy'?fmtM(q.total)+' ₽':fmtM(q.net)+' ₽');
+  document.getElementById('pvTotLbl').textContent=side==='buy'?'К списанию со счёта':'К зачислению на счёт';
+  if(q.amount<10)msg='Минимальная сумма ордера — 10 ₽';
+  else if(side==='buy'&&q.total>state.cash+0.005)msg='Недостаточно свободных средств';
+  else if(side==='sell'&&(!h||q.qty>h.qty+1e-9))msg='Недостаточно активов в портфеле';
+  else{ok=true;lastQuote=q}}
+ if(!ok)set('pvTot','—');
+ document.getElementById('tMsg').textContent=msg;
+ const btn=document.getElementById('goBtn');
+ btn.disabled=!ok;btn.className='gobtn '+side;
+ btn.textContent=(side==='buy'?'Купить ':'Продать ')+current}
+/* модалка */
+let pendingQuote=null;
+function openConfirm(){
+ if(!lastQuote)return;
+ pendingQuote=lastQuote;const q=pendingQuote,a=bySym[q.sym];
+ const rows=[['Операция',side==='buy'?'Покупка':'Продажа'],['Актив',`${a.name} (${q.sym})`],
+  ['Количество',fmtQ(q.qty,q.sym)+' шт'],['Цена исполнения',fmtP(q.px)+' ₽'],
+  ['Сумма сделки',fmtM(q.amount)+' ₽'],['Комиссия брокера','−'+fmtM(q.broker)+' ₽'],
+  ['Сбор биржи','−'+fmtM(q.exch)+' ₽']];
+ if(side==='sell')rows.push(['НДФЛ 13%',q.tax>0?'−'+fmtM(q.tax)+' ₽':'0 ₽']);
+ let html=rows.map(r=>`<div class="mrow"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
+ html+=`<div class="mrow final"><span>${side==='buy'?'Спишется со счёта':'Поступит на счёт'}</span><b>${fmtM(side==='buy'?q.total:q.net)} ₽</b></div>`;
+ document.getElementById('mRows').innerHTML=html;
+ document.getElementById('mTitle').textContent=(side==='buy'?'Покупка ':'Продажа ')+q.sym;
+ document.getElementById('mOk').className='mok '+side;
+ document.getElementById('ovl').classList.add('show')}
+document.getElementById('goBtn').onclick=openConfirm;
+document.getElementById('mOk').onclick=executeTrade;
+document.getElementById('mCancel').onclick=closeModal;
+document.getElementById('ovl').addEventListener('click',e=>{if(e.target.id==='ovl')closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+function closeModal(){document.getElementById('ovl').classList.remove('show');pendingQuote=null}
+function executeTrade(){const q=pendingQuote||lastQuote;if(!q)return;
+ if(q.side==='buy'){
+  state.cash-=q.total;
+  const h=state.hold[q.sym]||(state.hold[q.sym]={qty:0,invested:0});
+  h.qty+=q.qty;h.invested+=q.total;state.fees+=q.fees;
+  state.ops.unshift({t:Date.now(),side:'buy',sym:q.sym,qty:q.qty,px:q.px,amount:q.amount,fees:q.fees,tax:0,total:q.total});
+  toast(`✅ Куплено ${fmtQ(q.qty,q.sym)} ${q.sym} за <b class="mono">${fmtM(q.total)} ₽</b>`,'buy');
+ }else{
+  const h=state.hold[q.sym];
+  state.cash+=q.net;h.qty-=q.qty;h.invested-=q.avg*q.qty;
+  state.realized+=q.amount-q.fees-q.avg*q.qty;
+  if(h.qty<1e-9)delete state.hold[q.sym];
+  state.fees+=q.fees;state.tax+=q.tax;
+  state.ops.unshift({t:Date.now(),side:'sell',sym:q.sym,qty:q.qty,px:q.px,amount:q.amount,fees:q.fees,tax:q.tax,total:q.net});
+  toast(`💰 Продано ${fmtQ(q.qty,q.sym)} ${q.sym}`+(q.tax>0?`, НДФЛ удержан <b class="mono">${fmtM(q.tax)} ₽</b>`:''),'sell')}
+ if(state.ops.length>200)state.ops.length=200;
+ save();closeModal();amtEl.value='';qtyEl.value='';
+ afterPrices();renderHistory();drawChart(hoverIdx)}
+/* счёт / портфель / история */
+function portfolioValue(){let v=0;for(const s in state.hold){const h=state.hold[s];v+=h.qty*(MKT[s].p*BID_K)}return v}
+function setAll(sel,txt){document.querySelectorAll(sel).forEach(el=>el.textContent=txt)}
+function renderAccount(){const pos=portfolioValue(),total=state.cash+pos,pl=total-START,plp=pl/START*100;
+ setAll('.js-total',fmtM(total)+' ₽');
+ const plTxt=(pl>=0?'+':'−')+fmtM(Math.abs(pl))+' ₽ · '+fmtPct(plp);
+ document.querySelectorAll('.js-pl').forEach(el=>{el.textContent=plTxt;el.className='plbadge '+(pl>=0?'up':'down')+' js-pl'});
+ setAll('.js-rank',rank(plp));
+ setAll('.js-cash',fmtM(state.cash)+' ₽');setAll('.js-pos',fmtM(pos)+' ₽');
+ document.querySelectorAll('.js-real').forEach(el=>{el.textContent=(state.realized>=0?'+':'')+fmtM(state.realized)+' ₽';
+  el.className=(state.realized>=0?'up':'down')+' js-real mono'});
+ setAll('.js-tax',fmtM(state.tax)+' ₽');setAll('.js-fees',fmtM(state.fees)+' ₽')}
+function renderPortfolio(){
+ document.querySelectorAll('.port-box').forEach(box=>{
+  const syms=Object.keys(state.hold).filter(s=>state.hold[s].qty>1e-9);
+  if(!syms.length){box.innerHTML='<div class="empty"><span class="big">🐹</span>Портфель пуст. Выберите актив в терминале и купите первую позицию!</div>';return}
+  const pos=portfolioValue();let rows='';
+  syms.sort((a,b)=>state.hold[b].qty*MKT[b].p-state.hold[a].qty*MKT[a].p).forEach(s=>{
+   const h=state.hold[s],bid=MKT[s].p*BID_K,avg=h.invested/h.qty,val=h.qty*bid;
+   const pl=val-h.invested,plp=h.invested>0?pl/h.invested*100:0,share=pos>0?val/pos*100:0;
+   rows+=`<tr style="cursor:pointer" onclick="selectAsset('${s}');showView('terminal')">
+    <td class="name"><b>${s}</b> · ${bySym[s].name}</td>
+    <td>${fmtQ(h.qty,s)}</td><td>${fmtP(avg)}</td><td>${fmtM(h.invested)}</td>
+    <td>${fmtP(bid)}</td><td><b>${fmtM(val)}</b></td>
+    <td class="${pl>=0?'up':'down'}">${(pl>=0?'+':'−')+fmtM(Math.abs(pl))}</td>
+    <td class="${pl>=0?'up':'down'}">${fmtPct(plp)}</td>
+    <td><div class="bar"><i style="width:${share}%"></i></div><span style="font-size:10px;color:var(--faint)">${share.toFixed(1)}%</span></td></tr>`});
+  box.innerHTML=`<table><thead><tr><th>Актив</th><th>Кол-во</th><th>Ср. цена ₽</th><th>Вложено ₽</th><th>Тек. цена</th><th>Стоимость ₽</th><th>P&L ₽</th><th>P&L %</th><th>Доля</th></tr></thead><tbody>${rows}</tbody></table>`})}
+function renderHistory(){
+ let html;
+ if(!state.ops.length){html='<div class="empty"><span class="big">📜</span>Операций пока не было</div>'}
+ else{let rows='';state.ops.slice(0,100).forEach(o=>{
+   rows+=`<tr><td>${new Date(o.t).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</td>
+    <td><span class="opbadge ${o.side==='buy'?'b':'s'}">${o.side==='buy'?'ПОКУПКА':'ПРОДАЖА'}</span></td>
+    <td class="name"><b>${o.sym}</b></td><td>${fmtQ(o.qty,o.sym)}</td><td>${fmtP(o.px)}</td>
+    <td>${fmtM(o.amount)}</td><td class="down">−${fmtM(o.fees)}</td>
+    <td>${o.tax>0?'<span class="down">−'+fmtM(o.tax)+'</span>':'—'}</td>
+    <td><b>${fmtM(o.total)}</b></td></tr>`});
+  html=`<table><thead><tr><th>Время</th><th>Операция</th><th>Актив</th><th>Кол-во</th><th>Цена ₽</th><th>Сумма ₽</th><th>Комиссия ₽</th><th>НДФЛ ₽</th><th>Итог ₽</th></tr></thead><tbody>${rows}</tbody></table>`}
+ document.querySelectorAll('.hist-box').forEach(b=>b.innerHTML=html)}
+/* вкладки видов */
+function showView(v){
+ document.querySelectorAll('.vbtn').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
+ document.getElementById('viewTerminal').style.display=v==='terminal'?'':'none';
+ document.getElementById('viewPortfolio').style.display=v==='portfolio'?'':'none';
+ document.getElementById('viewDocs').style.display=v==='docs'?'':'none';
+ if(v==='portfolio'){renderAccount();renderPortfolio();renderHistory()}
+ window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('.vbtn').forEach(b=>b.onclick=()=>showView(b.dataset.v));
+document.querySelectorAll('.dbtn').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.dbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+ document.querySelectorAll('.doc').forEach(d=>d.style.display=d.id==='doc-'+b.dataset.d?'':'none')});
+/* вкладки терминала */
+document.querySelectorAll('.btab').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.btab').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+ const t=b.dataset.t;
+ document.getElementById('tabHist').style.display=t==='hist'?'':'none';
+ document.getElementById('tabFees').style.display=t==='fees'?'':'none'});
+document.getElementById('resetBtn').onclick=()=>{
+ if(confirm('Сбросить игру? Баланс вернётся к 100 000 ₽, портфель и история будут удалены.')){
+  localStorage.removeItem(LS);location.reload()}};
+function toast(html,cls){const box=document.getElementById('toasts'),d=document.createElement('div');
+ d.className='toast '+(cls||'');d.innerHTML=html;box.appendChild(d);
+ setTimeout(()=>{d.classList.add('out');setTimeout(()=>d.remove(),320)},4200)}
+/* цикл */
+function afterPrices(){updateTape();renderList();updateHead();drawChart(hoverIdx);
+ updatePreview();renderAccount();renderPortfolio();renderDOM()}
+renderList();updateHead();drawChart();updatePreview();renderAccount();renderPortfolio();renderHistory();renderDOM();
+loadDay(bySym[current]);fetchCrypto();fetchStocks();
+setInterval(fetchCrypto,20000);
+setInterval(fetchStocks,20000);
+setInterval(simTick,2500);
+</script>
+</body>
+</html>
